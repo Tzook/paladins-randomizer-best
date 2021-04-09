@@ -1,4 +1,4 @@
-import { Button } from "@material-ui/core";
+import { Button, Snackbar } from "@material-ui/core";
 import { useEffect, useState, useCallback } from "react";
 import io, { Socket } from "socket.io-client";
 import Champs from "./Champs";
@@ -20,6 +20,9 @@ function App() {
     const [users, setUsers] = useState([]);
     const [settings, setSettings] = useState({});
     const [disconnected, setDisconnected] = useState();
+    const [openNotification, setOpenNotification] = useState(false);
+    const [notificationMessage, setNotificationMessage] = useState("");
+    const [notificationKey, setNotificationKey] = useState(0);
 
     // Connect on load
     useEffect(() => {
@@ -46,6 +49,11 @@ function App() {
             });
             socket.on("disconnect", () => {
                 setDisconnected(true);
+            });
+            socket.on("notification", ({ message }) => {
+                setNotificationMessage(message);
+                setOpenNotification(true);
+                setNotificationKey(Date.now());
             });
         }
     }, [socket]);
@@ -87,6 +95,14 @@ function App() {
         socket.io.opts.query = { ...socket.io.opts.query, ...getConnectQuery() };
         socket.connect();
     }, [socket]);
+
+    const closeNotification = (event, reason) => {
+        if (reason === "clickaway") {
+            return;
+        }
+
+        setOpenNotification(false);
+    };
 
     console.log(champs, users);
     return (
@@ -131,6 +147,17 @@ function App() {
                     </div>
                 </>
             )}
+            <Snackbar
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                }}
+                key={notificationKey}
+                open={openNotification}
+                autoHideDuration={4000}
+                onClose={closeNotification}
+                message={notificationMessage}
+            />
         </div>
     );
 }

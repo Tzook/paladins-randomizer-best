@@ -57,9 +57,13 @@ export function connectSocketio(io) {
         });
         socket.on("scramble", () => {
             scramble();
+            io.emit("notification", { message: `Scrambled by '${users.get(socket.id).name}'.` });
         });
         socket.on("kick", ({ id }) => {
             if (users.has(id)) {
+                io.emit("notification", {
+                    message: `'${users.get(id).name}' was kicked by '${users.get(socket.id).name}'.`,
+                });
                 users.delete(id);
             }
             io.sockets.sockets.forEach((sock) => {
@@ -67,7 +71,6 @@ export function connectSocketio(io) {
                     sock.disconnect(true);
                 }
             });
-            scramble();
         });
 
         function scramble() {
