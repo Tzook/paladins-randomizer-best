@@ -1,0 +1,29 @@
+{
+    "name": "heroku-cra-node",
+    "version": "3.0.0",
+    "description": "How to use create-react-app with a custom Node API on Heroku",
+    "engines": {
+        "node": "14.x"
+    },
+    "scripts": {
+        "start": "nodemon server",
+        "build": "cd react-ui/ && npm install && npm run build"
+    },
+    "cacheDirectories": [
+        "node_modules",
+        "react-ui/node_modules"
+    ],
+    "dependencies": {
+        "express": "^4.17.1"
+    },
+    "keywords": [
+        "node",
+        "heroku",
+        "create-react-app",
+        "react"
+    ],
+    "license": "MIT",
+    "devDependencies": {
+        "nodemon": "2.0.7"
+    }
+}
