@@ -1,13 +1,14 @@
 {
-    "name": "heroku-cra-node",
-    "version": "3.0.0",
-    "description": "How to use create-react-app with a custom Node API on Heroku",
+    "name": "paladins-randomizer-best",
+    "version": "1.0.0",
+    "description": "Randomize paladins champs",
+    "type": "module",
     "engines": {
         "node": "14.x"
     },
     "scripts": {
-        "start": "nodemon server",
-        "heroku-start": "node server",
+        "start": "nodemon server/index.mjs",
+        "heroku-start": "node server/index.mjs",
         "build": "cd react-ui/ && npm install && npm run build"
     },
     "cacheDirectories": [
@@ -15,7 +16,9 @@
         "react-ui/node_modules"
     ],
     "dependencies": {
-        "express": "^4.17.1"
+        "express": "^4.17.1",
+        "lodash": "4.17.21",
+        "node-fetch": "2.6.1"
     },
     "keywords": [
         "node",
@@ -23,7 +26,6 @@
         "create-react-app",
         "react"
     ],
-    "license": "MIT",
     "devDependencies": {
         "nodemon": "2.0.7"
     }
