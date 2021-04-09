@@ -1,3 +1,4 @@
+import { Button } from "@material-ui/core";
 import { useEffect, useState, useCallback } from "react";
 import io, { Socket } from "socket.io-client";
 import Champs from "./Champs";
@@ -18,6 +19,7 @@ function App() {
     const [champs, setChamps] = useState([]);
     const [users, setUsers] = useState([]);
     const [settings, setSettings] = useState({});
+    const [disconnected, setDisconnected] = useState();
 
     // Connect on load
     useEffect(() => {
@@ -38,6 +40,7 @@ function App() {
     useEffect(() => {
         if (socket) {
             socket.on("welcome", ({ champs, id }) => {
+                setDisconnected(false);
                 setChamps(champs);
                 setYourId(id);
             });
@@ -46,6 +49,9 @@ function App() {
             });
             socket.on("settings", ({ settings }) => {
                 setSettings(settings);
+            });
+            socket.on("disconnect", () => {
+                setDisconnected(true);
             });
         }
     }, [socket]);
@@ -76,6 +82,15 @@ function App() {
         },
         [socket]
     );
+    const kick = useCallback(
+        (id) => {
+            socket.emit("kick", { id });
+        },
+        [socket]
+    );
+    const reconnect = useCallback(() => {
+        socket.connect();
+    }, [socket]);
 
     console.log(champs, users);
     return (
@@ -92,22 +107,34 @@ function App() {
                 overflow: "auto",
             }}>
             <h1>Best Paladins Randomizer!</h1>
-            <div>
-                <Users
-                    users={users}
-                    scramble={scramble}
-                    yourId={yourId}
-                    sendNewName={sendNewName}
-                    settings={settings}
-                    updateSetting={updateSetting}
-                />
-            </div>
-            <div
-                style={{
-                    marginTop: "auto",
-                }}>
-                <Champs champs={champs} />
-            </div>
+            {disconnected ? (
+                <div>
+                    <h2>You have been kicked</h2>
+                    <Button variant="contained" color="primary" onClick={reconnect}>
+                        Reconnect
+                    </Button>
+                </div>
+            ) : (
+                <>
+                    <div>
+                        <Users
+                            users={users}
+                            scramble={scramble}
+                            yourId={yourId}
+                            sendNewName={sendNewName}
+                            settings={settings}
+                            updateSetting={updateSetting}
+                            kick={kick}
+                        />
+                    </div>
+                    <div
+                        style={{
+                            marginTop: "auto",
+                        }}>
+                        <Champs champs={champs} />
+                    </div>
+                </>
+            )}
         </div>
     );
 }

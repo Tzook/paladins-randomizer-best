@@ -1,11 +1,11 @@
 import { IconButton, Tooltip } from "@material-ui/core";
-import { InsertEmoticon } from "@material-ui/icons";
+import { Close, InsertEmoticon } from "@material-ui/icons";
 import { useCallback } from "react";
 import Champ from "./Champ";
 
 export const USER_SIZE = 86;
 
-function User({ user, yourId, sendNewName }) {
+function User({ user, yourId, sendNewName, kick }) {
     const updateName = useCallback(
         (event) => {
             const text = event.target.innerText;
@@ -15,6 +15,10 @@ function User({ user, yourId, sendNewName }) {
         },
         [user, sendNewName]
     );
+
+    const kickUser = useCallback(() => {
+        kick(user.id);
+    }, [user, kick]);
 
     const updateNameIfDone = useCallback((event) => {
         if (event.key === "Enter") {
@@ -55,20 +59,26 @@ function User({ user, yourId, sendNewName }) {
                     {user.name}
                 </span>
             </div>
-            {user.id === yourId ? (
-                <div
-                    style={{
-                        position: "absolute",
-                        top: -15,
-                        left: -15,
-                    }}>
+            <div
+                style={{
+                    position: "absolute",
+                    top: -15,
+                    left: -15,
+                }}>
+                {user.id === yourId ? (
                     <Tooltip title="This is you :)">
                         <IconButton style={{ background: "white" }} color="primary" size="small">
                             <InsertEmoticon />
                         </IconButton>
                     </Tooltip>
-                </div>
-            ) : null}
+                ) : (
+                    <Tooltip title="Kick">
+                        <IconButton color="secondary" size="small" onClick={kickUser}>
+                            <Close />
+                        </IconButton>
+                    </Tooltip>
+                )}
+            </div>
         </div>
     );
 }

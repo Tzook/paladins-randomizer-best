@@ -15,6 +15,7 @@ export const ROLE_DAMAGE = "Damage";
 export const ROLE_FLANK = "Flank";
 const SETTING_MIRROR = "Mirror";
 const SETTING_DUPLICATES = "Duplicates";
+const SETTING_TALENT = "Random Talent";
 
 const TEAM_NAME_A = "a";
 const TEAM_NAME_B = "b";
@@ -25,6 +26,7 @@ const settings = {
     [ROLE_FLANK]: { value: true, description: "Enable flank roles" },
     [SETTING_MIRROR]: { value: false, description: "Make both teams the same champions" },
     [SETTING_DUPLICATES]: { value: false, description: "Allow the same champion to be in both teams" },
+    // [SETTING_TALENT]: { value: false, description: "Tells you which talent to pick on the champion" },
 };
 
 export function connectSocketio(io) {
@@ -55,6 +57,17 @@ export function connectSocketio(io) {
             }
         });
         socket.on("scramble", () => {
+            scramble();
+        });
+        socket.on("kick", ({ id }) => {
+            if (users.has(id)) {
+                users.delete(id);
+            }
+            io.sockets.sockets.forEach((sock) => {
+                if (sock.id === id) {
+                    sock.disconnect(true);
+                }
+            });
             scramble();
         });
 
