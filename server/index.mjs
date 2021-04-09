@@ -8,6 +8,9 @@ const PORT = process.env.PORT || 5000;
 
 const app = express();
 
+// Priority serve any static files.
+app.use(express.static(resolve("./react-ui/build")));
+
 // Answer API requests.
 app.get("/champs", function (req, res) {
     res.set("Content-Type", "application/json");
