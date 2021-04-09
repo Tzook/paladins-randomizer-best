@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { getRandomAnyChamps } from "./champs-service.mjs";
 import { getAllChamps } from "./champs-service.mjs";
 
 const users = new Map();
@@ -22,6 +23,18 @@ export function connectSocketio(io) {
             users.delete(socket.id);
             notifyUsers();
         });
+
+        socket.on("scramble", () => {
+            const usersList = [...users.values()];
+            const shuffledUsers = _.shuffle(usersList);
+            const teams = _.sampleSize([TEAM_NAME_A, TEAM_NAME_B], 2);
+            const champs = getRandomAnyChamps(usersList.length);
+            for (let i = 0; i < shuffledUsers.length; i++) {
+                shuffledUsers[i].team = teams[i % 2];
+                shuffledUsers[i].champ = champs[i];
+            }
+            notifyUsers();
+        });
     });
 
     function notifyUsers() {
@@ -30,6 +43,18 @@ export function connectSocketio(io) {
 }
 
 function chooseTeam() {
+    const { teamA, teamB } = getTeamCounts();
+
+    if (teamA < teamB) {
+        return TEAM_NAME_A;
+    } else if (teamA > teamB) {
+        return TEAM_NAME_B;
+    } else {
+        return _.sample([TEAM_NAME_A, TEAM_NAME_B]);
+    }
+}
+
+function getTeamCounts() {
     let teamA = 0;
     let teamB = 0;
     for (const [, user] of users) {
@@ -39,11 +64,5 @@ function chooseTeam() {
             teamB++;
         }
     }
-    if (teamA < teamB) {
-        return TEAM_NAME_A;
-    } else if (teamA > teamB) {
-        return TEAM_NAME_B;
-    } else {
-        return _.sample([TEAM_NAME_A, TEAM_NAME_B]);
-    }
+    return { teamA, teamB };
 }

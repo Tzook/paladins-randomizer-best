@@ -3,6 +3,12 @@ import io, { Socket } from "socket.io-client";
 import Champs from "./Champs";
 import Users from "./Users";
 
+if (false) {
+    // This is here just to remove the annoying log about Socket not used.
+    const x = Socket;
+    console.log(x);
+}
+
 function App() {
     /**
      * @type {[Socket, function]} socket
@@ -31,8 +37,8 @@ function App() {
     }, [socket]);
 
     const scramble = useCallback(() => {
-        console.log("Scrambled!");
-    }, []);
+        socket.emit("scramble");
+    }, [socket]);
 
     console.log(champs, users);
     return (
@@ -46,6 +52,7 @@ function App() {
                 textAlign: "center",
                 display: "flex",
                 flexDirection: "column",
+                overflow: "auto",
             }}>
             <h1>Best Paladins Randomizer!</h1>
             <div>

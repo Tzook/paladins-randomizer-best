@@ -15,7 +15,7 @@ const ChampTooltip = withStyles((theme) => ({
     },
 }))(Tooltip);
 
-function Champ({ champ }) {
+function Champ({ champ, size = CHAMP_IMAGE_SIZE }) {
     return (
         <ChampTooltip title={champ.name} arrow>
             <img
@@ -23,8 +23,9 @@ function Champ({ champ }) {
                     outline: "1px solid #21f3e9",
                 }}
                 src={champ.image}
-                width={CHAMP_IMAGE_SIZE}
-                height={CHAMP_IMAGE_SIZE}
+                width={size}
+                height={size}
+                alt=""
             />
         </ChampTooltip>
     );

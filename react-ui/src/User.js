@@ -1,13 +1,15 @@
-import Champ, { CHAMP_IMAGE_SIZE } from "./Champ";
+import Champ from "./Champ";
+
+const USER_SIZE = 86;
 
 function User({ user }) {
     return (
         <div
             style={{
                 position: "relative",
-                width: CHAMP_IMAGE_SIZE,
+                width: USER_SIZE,
             }}>
-            <Champ champ={user.champ} />
+            <Champ champ={user.champ} size={USER_SIZE} />
             <div
                 style={{
                     position: "absolute",

@@ -11,34 +11,48 @@ function Users({ users, scramble }) {
 
     const scrambleClicked = useCallback(() => {
         scramble();
-    }, []);
+    }, [scramble]);
 
     return (
         <div
             style={{
                 display: "flex",
-                justifyContent: "center",
+                alignItems: "flex-start",
             }}>
             <div
                 style={{
                     width: "0",
-                    margin: "auto",
+                    margin: "0 auto",
                 }}>
                 {teamA.map((user) => (
-                    <User key={user.id} user={user} />
+                    <div
+                        key={user.id}
+                        style={{
+                            marginBottom: "8px",
+                        }}>
+                        <User user={user} />
+                    </div>
                 ))}
             </div>
             <div>
                 <h2>VS</h2>
-                <Button onClick={scrambleClicked}>Scramble!</Button>
+                <Button variant="contained" color="primary" onClick={scrambleClicked}>
+                    Scramble!
+                </Button>
             </div>
             <div
                 style={{
                     width: "0",
-                    margin: "auto",
+                    margin: "0 auto",
                 }}>
                 {teamB.map((user) => (
-                    <User key={user.id} user={user} />
+                    <div
+                        key={user.id}
+                        style={{
+                            marginBottom: "8px",
+                        }}>
+                        <User user={user} />
+                    </div>
                 ))}
             </div>
         </div>
