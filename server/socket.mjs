@@ -39,13 +39,23 @@ export function connectSocketio(io) {
         users.set(socket.id, { id: socket.id, name: name, team, champ: DEFAULT_CHAMP });
         notifyUsers();
 
+        io.emit("notification", {
+            message: `'${users.get(socket.id).name}' was connected.`,
+        });
+
         socket.on("disconnect", () => {
+            io.emit("notification", {
+                message: `'${users.get(socket.id).name}' was disconnected.`,
+            });
             users.delete(socket.id);
             notifyUsers();
         });
 
         socket.on("name", ({ newName }) => {
             const name = getValidName(newName);
+            io.emit("notification", {
+                message: `Name of '${users.get(socket.id).name}' was updated to '${name}'.`,
+            });
             users.get(socket.id).name = name;
             notifyUsers();
         });
@@ -53,6 +63,9 @@ export function connectSocketio(io) {
             if (settings.hasOwnProperty(setting)) {
                 settings[setting].value = !settings[setting].value;
                 io.emit("settings", { settings });
+                io.emit("notification", {
+                    message: `Setting '${setting}' was toggled by '${users.get(socket.id).name}'.`,
+                });
             }
         });
         socket.on("scramble", () => {
