@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import io, { Socket } from "socket.io-client";
 import Champs from "./Champs";
+import Users from "./Users";
 
 function App() {
     /**
@@ -8,6 +9,7 @@ function App() {
      */
     const [socket, setSocket] = useState();
     const [champs, setChamps] = useState([]);
+    const [users, setUsers] = useState([]);
 
     // Connect on load
     useEffect(() => {
@@ -22,10 +24,17 @@ function App() {
             socket.on("welcome", ({ champs }) => {
                 setChamps(champs);
             });
+            socket.on("users", ({ users }) => {
+                setUsers(users);
+            });
         }
     }, [socket]);
 
-    console.log(champs);
+    const scramble = useCallback(() => {
+        console.log("Scrambled!");
+    }, []);
+
+    console.log(champs, users);
     return (
         <div
             style={{
@@ -39,7 +48,9 @@ function App() {
                 flexDirection: "column",
             }}>
             <h1>Best Paladins Randomizer!</h1>
-
+            <div>
+                <Users users={users} scramble={scramble} />
+            </div>
             <div
                 style={{
                     marginTop: "auto",
