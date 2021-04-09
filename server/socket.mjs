@@ -26,7 +26,7 @@ const settings = {
     [ROLE_FLANK]: { value: true, description: "Enable flank roles" },
     [SETTING_MIRROR]: { value: false, description: "Make both teams the same champions" },
     [SETTING_DUPLICATES]: { value: false, description: "Allow the same champion to be in both teams" },
-    // [SETTING_TALENT]: { value: false, description: "Tells you which talent to pick on the champion" },
+    [SETTING_TALENT]: { value: false, description: "Tells you which talent to pick on the champion" },
 };
 
 export function connectSocketio(io) {
@@ -92,6 +92,10 @@ export function connectSocketio(io) {
             } else {
                 champs = getRandomAnyChamps(shuffledUsers.length, settings);
             }
+            let talents = [];
+            for (const champ of champs) {
+                talents.push(_.sample(champ.talents));
+            }
             if (!champs.length) {
                 for (const user of shuffledUsers) {
                     user.champ = DEFAULT_CHAMP;
@@ -101,9 +105,11 @@ export function connectSocketio(io) {
                     for (let i = 0; i < team.length; i++) {
                         const user = team[i];
                         user.champ = champs[i];
+                        user.talent = settings[SETTING_TALENT].value ? talents[i] : undefined;
                     }
                     if (!settings[SETTING_MIRROR].value) {
                         champs = champs.slice(team.length);
+                        talents = talents.slice(team.length);
                     }
                 }
             }

@@ -2,6 +2,7 @@ import { IconButton, Tooltip } from "@material-ui/core";
 import { Close, InsertEmoticon } from "@material-ui/icons";
 import { useCallback } from "react";
 import Champ from "./Champ";
+import Talent from "./Talent";
 
 export const USER_SIZE = 86;
 
@@ -79,6 +80,18 @@ function User({ user, yourId, sendNewName, kick }) {
                     </Tooltip>
                 )}
             </div>
+
+            {user.talent ? (
+                <div
+                    key={user.talent.name}
+                    style={{
+                        position: "absolute",
+                        top: -24,
+                        right: -24,
+                    }}>
+                    <Talent talent={user.talent} />
+                </div>
+            ) : null}
         </div>
     );
 }

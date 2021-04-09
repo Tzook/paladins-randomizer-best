@@ -71,7 +71,7 @@ function formatChamp(champ, champJson) {
             .map((talent) => ({
                 name: talent.card_name,
                 description: talent.card_description,
-                image: talent.championCard_URL,
+                image: talent.championTalent_URL,
             })),
     };
 }
