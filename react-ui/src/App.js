@@ -27,13 +27,7 @@ function App() {
             window.location.hostname === "localhost" || window.location.hostname.match(/\d+\.\d+\.\d+\.\d+/);
         const domain = isLocalHost ? `http://${window.location.hostname}:5000` : window.location.hostname;
 
-        const query = {};
-        try {
-            const name = localStorage.getItem("name");
-            if (name) {
-                query.name = name;
-            }
-        } catch {}
+        const query = getConnectQuery();
         setSocket(io(domain, { reconnection: false, query }));
     }, []);
 
@@ -59,6 +53,7 @@ function App() {
     useEffect(() => {
         for (const user of users) {
             if (user.id === yourId) {
+                // Why kick resets local storage????
                 try {
                     localStorage.setItem("name", user.name);
                 } catch {}
@@ -89,6 +84,7 @@ function App() {
         [socket]
     );
     const reconnect = useCallback(() => {
+        socket.io.opts.query = { ...socket.io.opts.query, ...getConnectQuery() };
         socket.connect();
     }, [socket]);
 
@@ -137,6 +133,15 @@ function App() {
             )}
         </div>
     );
+}
+
+function getConnectQuery() {
+    const query = {};
+    try {
+        const name = localStorage.getItem("name");
+        query.name = name || "";
+    } catch {}
+    return query;
 }
 
 export default App;

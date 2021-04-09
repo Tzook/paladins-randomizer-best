@@ -52,7 +52,6 @@ export function connectSocketio(io) {
         socket.on("setting", ({ setting }) => {
             if (settings.hasOwnProperty(setting)) {
                 settings[setting].value = !settings[setting].value;
-                scramble();
                 io.emit("settings", { settings });
             }
         });
