@@ -13,8 +13,8 @@ const TEAM_NAME_B = "b";
 
 export function connectSocketio(io) {
     io.on("connection", (socket) => {
-        console.log("a user connected");
-        socket.emit("welcome", { champs: getAllChamps() });
+        console.log("a user connected", socket.id);
+        socket.emit("welcome", { champs: getAllChamps(), id: socket.id });
         const team = chooseTeam();
         users.set(socket.id, { id: socket.id, name: "asdf", team, champ: DEFAULT_CHAMP });
         notifyUsers();
@@ -24,6 +24,13 @@ export function connectSocketio(io) {
             notifyUsers();
         });
 
+        socket.on("name", ({ newName }) => {
+            if (newName) {
+                const name = newName.substring(0, 16);
+                users.get(socket.id).name = name;
+                notifyUsers();
+            }
+        });
         socket.on("scramble", () => {
             const usersList = [...users.values()];
             const shuffledUsers = _.shuffle(usersList);
