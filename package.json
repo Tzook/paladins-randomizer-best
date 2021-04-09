@@ -7,6 +7,7 @@
     },
     "scripts": {
         "start": "nodemon server",
+        "heroku-start": "node server",
         "build": "cd react-ui/ && npm install && npm run build"
     },
     "cacheDirectories": [
