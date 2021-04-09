@@ -1,4 +1,4 @@
-import { getChampFileName } from "./get-champs.mjs";
+import { getChampFileName } from "./champs-crawler.mjs";
 import fs from "fs";
 import _ from "lodash";
 
@@ -24,8 +24,12 @@ export async function addChamp(champ) {
 }
 
 export function getRandomAnyChamps(amount) {
-    const availableChamps = _.flatten(Object.values(roles));
+    const availableChamps = getAllChamps();
     return _.sampleSize(availableChamps, amount);
+}
+
+export function getAllChamps() {
+    return _.sortBy(_.flatten(Object.values(roles)), "name");
 }
 
 /**

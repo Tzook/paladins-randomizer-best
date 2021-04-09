@@ -18,7 +18,8 @@
     "dependencies": {
         "express": "^4.17.1",
         "lodash": "4.17.21",
-        "node-fetch": "2.6.1"
+        "node-fetch": "2.6.1",
+        "socket.io": "4.0.1"
     },
     "keywords": [
         "node",
@@ -28,5 +29,10 @@
     ],
     "devDependencies": {
         "nodemon": "2.0.7"
+    },
+    "nodemonConfig": {
+        "ignore": [
+            "react-ui/*"
+        ]
     }
 }
