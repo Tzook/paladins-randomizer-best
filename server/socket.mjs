@@ -99,6 +99,7 @@ export function connectSocketio(io) {
 
         socket.on("undo", () => {
             if (usersHistory.length) {
+                io.emit("notification", { message: `Undo by '${users.get(socket.id).name}'.` });
                 storeHistoryArray(usersFuture);
                 popHistoryArray(usersHistory);
             }
@@ -106,6 +107,7 @@ export function connectSocketio(io) {
 
         socket.on("redo", () => {
             if (usersFuture.length) {
+                io.emit("notification", { message: `Redo by '${users.get(socket.id).name}'.` });
                 storeHistoryArray(usersHistory);
                 popHistoryArray(usersFuture);
             }
