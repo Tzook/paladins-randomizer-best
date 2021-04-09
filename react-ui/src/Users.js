@@ -1,17 +1,13 @@
-import { useCallback } from "react";
-import { Button, FormControlLabel, FormGroup, Switch, Tooltip } from "@material-ui/core";
+import { Button, FormControlLabel, FormGroup, IconButton, Switch, Tooltip } from "@material-ui/core";
 import User, { USER_SIZE } from "./User";
+import { Redo, Undo } from "@material-ui/icons";
 
 const TEAM_NAME_A = "a";
 const TEAM_NAME_B = "b";
 
-function Users({ users, scramble, yourId, sendNewName, settings, updateSetting, kick }) {
+function Users({ users, scramble, yourId, sendNewName, settings, updateSetting, kick, undo, redo, hasUndo, hasRedo }) {
     const teamA = users.filter((user) => user.team === TEAM_NAME_A);
     const teamB = users.filter((user) => user.team === TEAM_NAME_B);
-
-    const scrambleClicked = useCallback(() => {
-        scramble();
-    }, [scramble]);
 
     return (
         <div
@@ -54,15 +50,28 @@ function Users({ users, scramble, yourId, sendNewName, settings, updateSetting, 
                     ))}
                 </FormGroup>
 
-                <Button
+                <div
                     style={{
                         marginTop: "12px",
-                    }}
-                    variant="contained"
-                    color="primary"
-                    onClick={scrambleClicked}>
-                    Scramble!
-                </Button>
+                    }}>
+                    <Tooltip title="Undo">
+                        <span>
+                            <IconButton disabled={!hasUndo} color="secondary" onClick={undo}>
+                                <Undo />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                    <Button variant="contained" color="primary" onClick={scramble}>
+                        Scramble!
+                    </Button>
+                    <Tooltip title="Redo">
+                        <span>
+                            <IconButton disabled={!hasRedo} color="secondary" onClick={redo}>
+                                <Redo />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                </div>
             </div>
             <div
                 style={{

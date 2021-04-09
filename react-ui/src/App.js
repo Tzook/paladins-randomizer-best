@@ -23,6 +23,8 @@ function App() {
     const [openNotification, setOpenNotification] = useState(false);
     const [notificationMessage, setNotificationMessage] = useState("");
     const [notificationKey, setNotificationKey] = useState(0);
+    const [hasUndo, setHasUndo] = useState();
+    const [hasRedo, setHasRedo] = useState();
 
     // Connect on load
     useEffect(() => {
@@ -55,6 +57,10 @@ function App() {
                 setOpenNotification(true);
                 setNotificationKey(Date.now());
             });
+            socket.on("history", ({ undo, redo }) => {
+                setHasUndo(undo);
+                setHasRedo(redo);
+            });
         }
     }, [socket]);
 
@@ -71,6 +77,14 @@ function App() {
 
     const scramble = useCallback(() => {
         socket.emit("scramble");
+    }, [socket]);
+
+    const undo = useCallback(() => {
+        socket.emit("undo");
+    }, [socket]);
+
+    const redo = useCallback(() => {
+        socket.emit("redo");
     }, [socket]);
 
     const sendNewName = useCallback(
@@ -100,7 +114,6 @@ function App() {
         if (reason === "clickaway") {
             return;
         }
-
         setOpenNotification(false);
     };
 
@@ -126,7 +139,8 @@ function App() {
                         Reconnect
                     </Button>
                 </div>
-            ) : (
+            ) : null}
+            {disconnected || !users.length ? null : (
                 <>
                     <div>
                         <Users
@@ -137,6 +151,10 @@ function App() {
                             settings={settings}
                             updateSetting={updateSetting}
                             kick={kick}
+                            undo={undo}
+                            redo={redo}
+                            hasUndo={hasUndo}
+                            hasRedo={hasRedo}
                         />
                     </div>
                     <div

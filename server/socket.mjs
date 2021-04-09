@@ -4,6 +4,9 @@ import { getAllChamps } from "./champs-service.mjs";
 import { getRandomName } from "mmo-name-generator";
 
 const users = new Map();
+let usersHistory = [];
+let usersFuture = [];
+const MAX_HISTORY_LENGTH = 20;
 const DEFAULT_CHAMP = {
     name: "",
     image: "https://yt3.ggpht.com/ytc/AAUvwng8YX7GkjTTqETCOLTE0BC0EkTq07OJmjMD1AFY=s88-c-k-c0x00ffffff-no-rj",
@@ -36,8 +39,9 @@ export function connectSocketio(io) {
         socket.emit("settings", { settings });
         const team = chooseTeam();
         const name = getValidName(socket.handshake.query.name);
-        users.set(socket.id, { id: socket.id, name: name, team, champ: DEFAULT_CHAMP });
+        users.set(socket.id, { id: socket.id, name, team, champ: DEFAULT_CHAMP });
         notifyUsers();
+        resetHistory();
 
         io.emit("notification", {
             message: `'${users.get(socket.id).name}' was connected.`,
@@ -48,6 +52,7 @@ export function connectSocketio(io) {
                 message: `'${users.get(socket.id).name}' was disconnected.`,
             });
             users.delete(socket.id);
+            resetHistory();
             notifyUsers();
         });
 
@@ -59,6 +64,7 @@ export function connectSocketio(io) {
             users.get(socket.id).name = name;
             notifyUsers();
         });
+
         socket.on("setting", ({ setting }) => {
             if (settings.hasOwnProperty(setting)) {
                 settings[setting].value = !settings[setting].value;
@@ -68,16 +74,21 @@ export function connectSocketio(io) {
                 });
             }
         });
+
         socket.on("scramble", () => {
+            storeHistoryArray(usersHistory);
+            notifyHistory();
             scramble();
             io.emit("notification", { message: `Scrambled by '${users.get(socket.id).name}'.` });
         });
+
         socket.on("kick", ({ id }) => {
             if (users.has(id)) {
                 io.emit("notification", {
                     message: `'${users.get(id).name}' was kicked by '${users.get(socket.id).name}'.`,
                 });
                 users.delete(id);
+                resetHistory();
             }
             io.sockets.sockets.forEach((sock) => {
                 if (sock.id === id) {
@@ -85,6 +96,54 @@ export function connectSocketio(io) {
                 }
             });
         });
+
+        socket.on("undo", () => {
+            if (usersHistory.length) {
+                storeHistoryArray(usersFuture);
+                popHistoryArray(usersHistory);
+            }
+        });
+
+        socket.on("redo", () => {
+            if (usersFuture.length) {
+                storeHistoryArray(usersHistory);
+                popHistoryArray(usersFuture);
+            }
+        });
+
+        function storeHistoryArray(array) {
+            const historyRow = [];
+            for (const [id, { team, champ, talent }] of users) {
+                historyRow.push({ id, team, champ, talent });
+            }
+            array.push(historyRow);
+            if (array.length > MAX_HISTORY_LENGTH) {
+                array.shift();
+            }
+        }
+
+        function popHistoryArray(array) {
+            const historyRow = array.pop();
+            for (const userHistory of historyRow) {
+                const user = users.get(userHistory.id);
+                users.set(user.id, { ...user, ...userHistory });
+            }
+            notifyUsers();
+            notifyHistory();
+        }
+
+        function resetHistory() {
+            usersHistory = [];
+            usersFuture = [];
+            notifyHistory();
+        }
+
+        function notifyHistory() {
+            io.emit("history", {
+                undo: usersHistory.length > 0,
+                redo: usersFuture.length > 0,
+            });
+        }
 
         function scramble() {
             const usersList = [...users.values()];
