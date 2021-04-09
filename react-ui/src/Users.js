@@ -29,7 +29,7 @@ function Users({ users, scramble, yourId, sendNewName, settings, updateSetting }
                     <div
                         key={user.id}
                         style={{
-                            marginBottom: "8px",
+                            marginBottom: "16px",
                         }}>
                         <User user={user} yourId={yourId} sendNewName={sendNewName} />
                     </div>
@@ -73,7 +73,7 @@ function Users({ users, scramble, yourId, sendNewName, settings, updateSetting }
                     <div
                         key={user.id}
                         style={{
-                            marginBottom: "8px",
+                            marginBottom: "16px",
                         }}>
                         <User user={user} yourId={yourId} sendNewName={sendNewName} />
                     </div>

@@ -1,3 +1,5 @@
+import { IconButton, Tooltip } from "@material-ui/core";
+import { InsertEmoticon } from "@material-ui/icons";
 import { useCallback } from "react";
 import Champ from "./Champ";
 
@@ -52,6 +54,20 @@ function User({ user, yourId, sendNewName }) {
                     {user.name}
                 </span>
             </div>
+            {user.id === yourId ? (
+                <div
+                    style={{
+                        position: "absolute",
+                        top: -15,
+                        left: -15,
+                    }}>
+                    <Tooltip title="This is you :)">
+                        <IconButton style={{ background: "white" }} color="primary" size="small">
+                            <InsertEmoticon />
+                        </IconButton>
+                    </Tooltip>
+                </div>
+            ) : null}
         </div>
     );
 }
