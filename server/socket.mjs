@@ -175,6 +175,7 @@ export function connectSocketio(io) {
             if (!champs.length) {
                 for (const user of shuffledUsers) {
                     user.champ = DEFAULT_CHAMP;
+                    user.talent = undefined;
                 }
             } else {
                 for (const team of teams) {
