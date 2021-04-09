@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { getRandomAnyChamps } from "./champs-service.mjs";
 import { getAllChamps } from "./champs-service.mjs";
+import { getRandomName } from "mmo-name-generator";
 
 const users = new Map();
 const DEFAULT_CHAMP = {
@@ -28,11 +29,12 @@ const settings = {
 
 export function connectSocketio(io) {
     io.on("connection", (socket) => {
-        console.log("a user connected", socket.id);
+        console.log("a user connected", socket.id, socket.handshake.query.name);
         socket.emit("welcome", { champs: getAllChamps(), id: socket.id });
         socket.emit("settings", { settings });
         const team = chooseTeam();
-        users.set(socket.id, { id: socket.id, name: "asdf", team, champ: DEFAULT_CHAMP });
+        const name = getValidName(socket.handshake.query.name);
+        users.set(socket.id, { id: socket.id, name: name, team, champ: DEFAULT_CHAMP });
         notifyUsers();
 
         socket.on("disconnect", () => {
@@ -41,11 +43,9 @@ export function connectSocketio(io) {
         });
 
         socket.on("name", ({ newName }) => {
-            if (newName) {
-                const name = newName.substring(0, 16);
-                users.get(socket.id).name = name;
-                notifyUsers();
-            }
+            const name = getValidName(newName);
+            users.get(socket.id).name = name;
+            notifyUsers();
         });
         socket.on("setting", ({ setting }) => {
             if (settings.hasOwnProperty(setting)) {
@@ -113,6 +113,10 @@ function chooseTeam() {
     } else {
         return _.sample([TEAM_NAME_A, TEAM_NAME_B]);
     }
+}
+
+function getValidName(name) {
+    return name && _.isString(name) ? name.substring(0, 16) : getRandomName();
 }
 
 function getTeamCounts() {

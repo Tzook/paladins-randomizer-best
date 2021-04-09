@@ -24,7 +24,15 @@ function App() {
         const isLocalHost =
             window.location.hostname === "localhost" || window.location.hostname.match(/\d+\.\d+\.\d+\.\d+/);
         const domain = isLocalHost ? `http://${window.location.hostname}:5000` : window.location.hostname;
-        setSocket(io(domain, { reconnection: false }));
+
+        const query = {};
+        try {
+            const name = localStorage.getItem("name");
+            if (name) {
+                query.name = name;
+            }
+        } catch {}
+        setSocket(io(domain, { reconnection: false, query }));
     }, []);
 
     useEffect(() => {
@@ -41,6 +49,16 @@ function App() {
             });
         }
     }, [socket]);
+
+    useEffect(() => {
+        for (const user of users) {
+            if (user.id === yourId) {
+                try {
+                    localStorage.setItem("name", user.name);
+                } catch {}
+            }
+        }
+    }, [users, yourId]);
 
     const scramble = useCallback(() => {
         socket.emit("scramble");

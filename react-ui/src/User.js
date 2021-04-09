@@ -1,33 +1,14 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import Champ from "./Champ";
 
 export const USER_SIZE = 86;
 
-let yourUserGlobal;
-let alreadySetName;
-
 function User({ user, yourId, sendNewName }) {
-    if (user.id === yourId) {
-        yourUserGlobal = user;
-    }
-    useEffect(() => {
-        if (!alreadySetName) {
-            alreadySetName = true;
-            const name = localStorage.getItem("name");
-            if (name && name !== yourUserGlobal.name) {
-                sendNewName(name);
-            }
-        }
-    }, [sendNewName]);
-
     const updateName = useCallback(
         (event) => {
             const text = event.target.innerText;
             if (text !== user.name) {
                 sendNewName(text);
-                try {
-                    localStorage.setItem("name", text);
-                } catch {}
             }
         },
         [user, sendNewName]
