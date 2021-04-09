@@ -8,13 +8,29 @@ const DEFAULT_CHAMP = {
     image: "https://yt3.ggpht.com/ytc/AAUvwng8YX7GkjTTqETCOLTE0BC0EkTq07OJmjMD1AFY=s88-c-k-c0x00ffffff-no-rj",
 };
 
+export const ROLE_FRONTLINE = "Frontline";
+export const ROLE_SUPPORT = "Support";
+export const ROLE_DAMAGE = "Damage";
+export const ROLE_FLANK = "Flank";
+const SETTING_MIRROR = "Mirror";
+const SETTING_DUPLICATES = "Duplicates";
+
 const TEAM_NAME_A = "a";
 const TEAM_NAME_B = "b";
+const settings = {
+    [ROLE_FRONTLINE]: { value: true, description: "Enable frontline roles" },
+    [ROLE_SUPPORT]: { value: true, description: "Enable support roles" },
+    [ROLE_DAMAGE]: { value: true, description: "Enable damage roles" },
+    [ROLE_FLANK]: { value: true, description: "Enable flank roles" },
+    [SETTING_MIRROR]: { value: false, description: "Make both teams the same champions" },
+    [SETTING_DUPLICATES]: { value: false, description: "Allow the same champion to be in both teams" },
+};
 
 export function connectSocketio(io) {
     io.on("connection", (socket) => {
         console.log("a user connected", socket.id);
         socket.emit("welcome", { champs: getAllChamps(), id: socket.id });
+        socket.emit("settings", { settings });
         const team = chooseTeam();
         users.set(socket.id, { id: socket.id, name: "asdf", team, champ: DEFAULT_CHAMP });
         notifyUsers();
@@ -31,17 +47,55 @@ export function connectSocketio(io) {
                 notifyUsers();
             }
         });
+        socket.on("setting", ({ setting }) => {
+            if (settings.hasOwnProperty(setting)) {
+                settings[setting].value = !settings[setting].value;
+                scramble();
+                io.emit("settings", { settings });
+            }
+        });
         socket.on("scramble", () => {
+            scramble();
+        });
+
+        function scramble() {
             const usersList = [...users.values()];
             const shuffledUsers = _.shuffle(usersList);
-            const teams = _.sampleSize([TEAM_NAME_A, TEAM_NAME_B], 2);
-            const champs = getRandomAnyChamps(usersList.length);
+            const teamGroups = _.shuffle([TEAM_NAME_A, TEAM_NAME_B]);
+            const teams = [[], []];
+
             for (let i = 0; i < shuffledUsers.length; i++) {
-                shuffledUsers[i].team = teams[i % 2];
-                shuffledUsers[i].champ = champs[i];
+                teams[i % 2].push(shuffledUsers[i]);
+                shuffledUsers[i].team = teamGroups[i % 2];
+            }
+            let champs;
+
+            if (settings[SETTING_MIRROR].value) {
+                champs = getRandomAnyChamps(Math.max(teams[0].length, teams[1].length), settings);
+            } else if (settings[SETTING_DUPLICATES].value) {
+                champs = getRandomAnyChamps(teams[0].length, settings).concat(
+                    getRandomAnyChamps(teams[1].length, settings)
+                );
+            } else {
+                champs = getRandomAnyChamps(shuffledUsers.length, settings);
+            }
+            if (!champs.length) {
+                for (const user of shuffledUsers) {
+                    user.champ = DEFAULT_CHAMP;
+                }
+            } else {
+                for (const team of teams) {
+                    for (let i = 0; i < team.length; i++) {
+                        const user = team[i];
+                        user.champ = champs[i];
+                    }
+                    if (!settings[SETTING_MIRROR].value) {
+                        champs = champs.slice(team.length);
+                    }
+                }
             }
             notifyUsers();
-        });
+        }
     });
 
     function notifyUsers() {

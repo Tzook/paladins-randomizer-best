@@ -1,11 +1,11 @@
 import { useCallback } from "react";
-import { Button } from "@material-ui/core";
+import { Button, FormControlLabel, FormGroup, Switch, Tooltip } from "@material-ui/core";
 import User, { USER_SIZE } from "./User";
 
 const TEAM_NAME_A = "a";
 const TEAM_NAME_B = "b";
 
-function Users({ users, scramble, yourId, sendNewName }) {
+function Users({ users, scramble, yourId, sendNewName, settings, updateSetting }) {
     const teamA = users.filter((user) => user.team === TEAM_NAME_A);
     const teamB = users.filter((user) => user.team === TEAM_NAME_B);
 
@@ -37,7 +37,30 @@ function Users({ users, scramble, yourId, sendNewName }) {
             </div>
             <div>
                 <h2>VS</h2>
-                <Button variant="contained" color="primary" onClick={scrambleClicked}>
+
+                <FormGroup>
+                    {Object.keys(settings).map((settingName) => (
+                        <Tooltip title={settings[settingName].description}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={settings[settingName].value}
+                                        onChange={() => updateSetting(settingName)}
+                                    />
+                                }
+                                label={settingName}
+                            />
+                        </Tooltip>
+                    ))}
+                </FormGroup>
+
+                <Button
+                    style={{
+                        marginTop: "12px",
+                    }}
+                    variant="contained"
+                    color="primary"
+                    onClick={scrambleClicked}>
                     Scramble!
                 </Button>
             </div>

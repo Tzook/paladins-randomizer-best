@@ -17,6 +17,7 @@ function App() {
     const [yourId, setYourId] = useState();
     const [champs, setChamps] = useState([]);
     const [users, setUsers] = useState([]);
+    const [settings, setSettings] = useState({});
 
     // Connect on load
     useEffect(() => {
@@ -35,6 +36,9 @@ function App() {
             socket.on("users", ({ users }) => {
                 setUsers(users);
             });
+            socket.on("settings", ({ settings }) => {
+                setSettings(settings);
+            });
         }
     }, [socket]);
 
@@ -45,6 +49,12 @@ function App() {
     const sendNewName = useCallback(
         (newName) => {
             socket.emit("name", { newName });
+        },
+        [socket]
+    );
+    const updateSetting = useCallback(
+        (setting) => {
+            socket.emit("setting", { setting });
         },
         [socket]
     );
@@ -65,7 +75,14 @@ function App() {
             }}>
             <h1>Best Paladins Randomizer!</h1>
             <div>
-                <Users users={users} scramble={scramble} yourId={yourId} sendNewName={sendNewName} />
+                <Users
+                    users={users}
+                    scramble={scramble}
+                    yourId={yourId}
+                    sendNewName={sendNewName}
+                    settings={settings}
+                    updateSetting={updateSetting}
+                />
             </div>
             <div
                 style={{

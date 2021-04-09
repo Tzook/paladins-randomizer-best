@@ -1,7 +1,7 @@
 import { withStyles } from "@material-ui/core";
 import Tooltip from "@material-ui/core/Tooltip";
 
-export const CHAMP_IMAGE_SIZE = 72;
+export const CHAMP_IMAGE_SIZE = 64;
 
 const ChampTooltip = withStyles((theme) => ({
     arrow: {
