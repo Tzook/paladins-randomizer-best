@@ -1,4 +1,4 @@
-import Champ from "./Champ";
+import Champ, { CHAMP_IMAGE_SIZE } from "./Champ";
 
 function Champs({ champs }) {
     return (
@@ -6,7 +6,9 @@ function Champs({ champs }) {
             style={{
                 display: "grid",
                 gridAutoFlow: "row",
-                gridTemplateColumns: "repeat(10, 1fr)",
+                gridGap: 12,
+                gridTemplateColumns: `repeat(auto-fill, ${CHAMP_IMAGE_SIZE}px)`,
+                justifyContent: "center",
             }}>
             {champs.map((champ) => (
                 <Champ key={champ.name} champ={champ} />

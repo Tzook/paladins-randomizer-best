@@ -34,13 +34,18 @@ function App() {
                 padding: "20px",
                 backgroundColor: "#282c34",
                 color: "white",
-                textAlign: " center",
+                textAlign: "center",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-around",
             }}>
-            <span>Randomize!</span>
-            <Champs champs={champs} />
+            <h1>Best Paladins Randomizer!</h1>
+
+            <div
+                style={{
+                    marginTop: "auto",
+                }}>
+                <Champs champs={champs} />
+            </div>
         </div>
     );
 }
