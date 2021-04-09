@@ -40,6 +40,7 @@ function User({ user, yourId, sendNewName }) {
                 }}>
                 <span
                     contentEditable={user.id === yourId}
+                    spellCheck={false}
                     suppressContentEditableWarning={true}
                     onKeyDown={updateNameIfDone}
                     onBlur={updateName}
