@@ -48,12 +48,14 @@ export function connectSocketio(io) {
         });
 
         socket.on("disconnect", () => {
-            io.emit("notification", {
-                message: `'${users.get(socket.id).name}' was disconnected.`,
-            });
-            users.delete(socket.id);
-            resetHistory();
-            notifyUsers();
+            if (users.has(socket.id)) {
+                io.emit("notification", {
+                    message: `'${users.get(socket.id).name}' was disconnected.`,
+                });
+                users.delete(socket.id);
+                resetHistory();
+                notifyUsers();
+            }
         });
 
         socket.on("name", ({ newName }) => {
