@@ -25,6 +25,7 @@ function App() {
     const [notificationKey, setNotificationKey] = useState(0);
     const [hasUndo, setHasUndo] = useState();
     const [hasRedo, setHasRedo] = useState();
+    const [bannedChamps, setBannedChamps] = useState({});
 
     // Connect on load
     useEffect(() => {
@@ -33,6 +34,12 @@ function App() {
         const domain = isLocalHost ? `http://${window.location.hostname}:5000` : window.location.hostname;
 
         const query = getConnectQuery();
+        if (query.bansString) {
+            try {
+                const bans = JSON.parse(query.bansString);
+                setBannedChamps(bans);
+            } catch {}
+        }
         setSocket(io(domain, { reconnection: false, query }));
     }, []);
 
@@ -67,7 +74,6 @@ function App() {
     useEffect(() => {
         for (const user of users) {
             if (user.id === yourId) {
-                // Why kick resets local storage????
                 try {
                     localStorage.setItem("name", user.name);
                 } catch {}
@@ -117,6 +123,24 @@ function App() {
         setOpenNotification(false);
     };
 
+    const toggleBan = useCallback(
+        (champName) => {
+            socket.emit("ban", { champName });
+            setBannedChamps((bannedChamps) => {
+                const newBans = { ...bannedChamps };
+                newBans[champName] = !newBans[champName];
+                if (!newBans[champName]) {
+                    delete newBans[champName];
+                }
+                try {
+                    localStorage.setItem("bans", JSON.stringify(newBans));
+                } catch {}
+                return newBans;
+            });
+        },
+        [socket]
+    );
+
     console.log(champs, users);
     return (
         <div
@@ -161,7 +185,7 @@ function App() {
                         style={{
                             marginTop: "auto",
                         }}>
-                        <Champs champs={champs} />
+                        <Champs champs={champs} bannedChamps={bannedChamps} toggleBan={toggleBan} />
                     </div>
                 </>
             )}
@@ -185,6 +209,10 @@ function getConnectQuery() {
     try {
         const name = localStorage.getItem("name");
         query.name = name || "";
+    } catch {}
+    try {
+        const bansString = localStorage.getItem("bans");
+        query.bansString = bansString || "";
     } catch {}
     return query;
 }

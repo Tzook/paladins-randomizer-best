@@ -39,7 +39,8 @@ export function connectSocketio(io) {
         socket.emit("settings", { settings });
         const team = chooseTeam();
         const name = getValidName(socket.handshake.query.name);
-        users.set(socket.id, { id: socket.id, name, team, champ: DEFAULT_CHAMP });
+        const bans = getValidBans(socket.handshake.query.bansString);
+        users.set(socket.id, { id: socket.id, name, team, champ: DEFAULT_CHAMP, bans });
         notifyUsers();
         resetHistory();
 
@@ -115,6 +116,13 @@ export function connectSocketio(io) {
             }
         });
 
+        socket.on("ban", ({ champName }) => {
+            if (_.isString(champName)) {
+                const user = users.get(socket.id);
+                user.bans[champName] = !user.bans[champName];
+            }
+        });
+
         function storeHistoryArray(array) {
             const historyRow = [];
             for (const [id, { team, champ, talent }] of users) {
@@ -171,7 +179,7 @@ export function connectSocketio(io) {
                         user.champ = teams[0][userIndex].champ;
                         user.talent = teams[0][userIndex].talent;
                     } else {
-                        user.champ = getRandomChamp(settings, takenChamps);
+                        user.champ = getRandomChamp(settings, takenChamps, user.bans);
                         if (user.champ) {
                             takenChamps.add(user.champ);
                         } else {
@@ -204,6 +212,16 @@ function chooseTeam() {
 
 function getValidName(name) {
     return name && _.isString(name) ? name.substring(0, 16) : getRandomName();
+}
+
+function getValidBans(bansString) {
+    try {
+        const bans = JSON.parse(bansString);
+        if (_.isPlainObject(bans)) {
+            return bans;
+        }
+    } catch {}
+    return {};
 }
 
 function getTeamCounts() {
