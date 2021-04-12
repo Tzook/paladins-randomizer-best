@@ -179,7 +179,11 @@ export function connectSocketio(io) {
                         user.champ = teams[0][userIndex].champ;
                         user.talent = teams[0][userIndex].talent;
                     } else {
-                        user.champ = getRandomChamp(settings, takenChamps, user.bans);
+                        let bans = user.bans;
+                        if (settings[SETTING_MIRROR].value && teams[1][userIndex]) {
+                            bans = { ...bans, ...teams[1][userIndex].bans };
+                        }
+                        user.champ = getRandomChamp(settings, takenChamps, bans);
                         if (user.champ) {
                             takenChamps.add(user.champ);
                         } else {
