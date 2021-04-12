@@ -30,15 +30,19 @@ export async function addChamp(champ) {
     });
 }
 
-export function getRandomAnyChamps(amount, settings) {
+export function getRandomChamp(settings, bannedChampsSet) {
     let availableChamps = [];
     for (let roleName in ROLE_TO_DATA) {
         if (settings[roleName].value) {
             const roleData = ROLE_TO_DATA[roleName];
-            availableChamps = availableChamps.concat(roles[roleData]);
+            for (const champ of roles[roleData]) {
+                if (!bannedChampsSet.has(champ)) {
+                    availableChamps.push(champ);
+                }
+            }
         }
     }
-    return _.sampleSize(availableChamps, amount);
+    return _.sample(availableChamps);
 }
 
 export function getAllChamps() {

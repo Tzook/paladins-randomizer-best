@@ -1,7 +1,6 @@
 import express from "express";
 import http from "http";
 import { resolve } from "path";
-import { getRandomAnyChamps } from "./champs-service.mjs";
 import { crawlChamps } from "./champs-crawler.mjs";
 import { Server } from "socket.io";
 import { connectSocketio } from "./socket.mjs";

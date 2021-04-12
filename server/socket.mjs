@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { getRandomAnyChamps } from "./champs-service.mjs";
+import { getRandomChamp } from "./champs-service.mjs";
 import { getAllChamps } from "./champs-service.mjs";
 import { getRandomName } from "mmo-name-generator";
 
@@ -17,8 +17,8 @@ export const ROLE_SUPPORT = "Support";
 export const ROLE_DAMAGE = "Damage";
 export const ROLE_FLANK = "Flank";
 const SETTING_MIRROR = "Mirror";
-const SETTING_DUPLICATES = "Duplicates";
 const SETTING_TALENT = "Random Talent";
+// const SETTING_MATCH_ROLES = "Match Roles";
 
 const TEAM_NAME_A = "a";
 const TEAM_NAME_B = "b";
@@ -28,8 +28,8 @@ const settings = {
     [ROLE_DAMAGE]: { value: true, description: "Enable damage roles" },
     [ROLE_FLANK]: { value: true, description: "Enable flank roles" },
     [SETTING_MIRROR]: { value: false, description: "Make both teams the same champions" },
-    [SETTING_DUPLICATES]: { value: false, description: "Allow the same champion to be in both teams" },
     [SETTING_TALENT]: { value: false, description: "Tells you which talent to pick on the champion" },
+    // [SETTING_MATCH_ROLES]: { value: true, description: "Ensure that both teams have the same roles" },
 };
 
 export function connectSocketio(io) {
@@ -159,36 +159,25 @@ export function connectSocketio(io) {
                 teams[i % 2].push(shuffledUsers[i]);
                 shuffledUsers[i].team = teamGroups[i % 2];
             }
-            let champs;
 
-            if (settings[SETTING_MIRROR].value) {
-                champs = getRandomAnyChamps(Math.max(teams[0].length, teams[1].length), settings);
-            } else if (settings[SETTING_DUPLICATES].value) {
-                champs = getRandomAnyChamps(teams[0].length, settings).concat(
-                    getRandomAnyChamps(teams[1].length, settings)
-                );
-            } else {
-                champs = getRandomAnyChamps(shuffledUsers.length, settings);
-            }
-            let talents = [];
-            for (const champ of champs) {
-                talents.push(_.sample(champ.talents));
-            }
-            if (!champs.length) {
-                for (const user of shuffledUsers) {
-                    user.champ = DEFAULT_CHAMP;
-                    user.talent = undefined;
-                }
-            } else {
-                for (const team of teams) {
-                    for (let i = 0; i < team.length; i++) {
-                        const user = team[i];
-                        user.champ = champs[i];
-                        user.talent = settings[SETTING_TALENT].value ? talents[i] : undefined;
-                    }
-                    if (!settings[SETTING_MIRROR].value) {
-                        champs = champs.slice(team.length);
-                        talents = talents.slice(team.length);
+            const takenChamps = new Set();
+            for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
+                const team = teams[teamIndex];
+                const shouldMirror = settings[SETTING_MIRROR].value && teamIndex === 1;
+                for (let userIndex = 0; userIndex < team.length; userIndex++) {
+                    const user = team[userIndex];
+
+                    if (shouldMirror) {
+                        user.champ = teams[0][userIndex].champ;
+                        user.talent = teams[0][userIndex].talent;
+                    } else {
+                        user.champ = getRandomChamp(settings, takenChamps);
+                        if (user.champ) {
+                            takenChamps.add(user.champ);
+                        } else {
+                            user.champ = DEFAULT_CHAMP;
+                        }
+                        user.talent = settings[SETTING_TALENT].value ? _.sample(user.champ.talents) : undefined;
                     }
                 }
             }
