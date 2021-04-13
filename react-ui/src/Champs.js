@@ -1,8 +1,8 @@
 import { IconButton, Tooltip } from "@material-ui/core";
-import { Close, Restore } from "@material-ui/icons";
+import { Close, Delete, Restore } from "@material-ui/icons";
 import Champ, { CHAMP_IMAGE_SIZE } from "./Champ";
 
-function Champs({ champs, bannedChamps, toggleBan }) {
+function Champs({ champs, lockedChamps, toggleLock, bannedChamps, toggleBan }) {
     return (
         <div
             style={{
@@ -22,7 +22,7 @@ function Champs({ champs, bannedChamps, toggleBan }) {
                     }}>
                     <div
                         style={{
-                            opacity: bannedChamps[champ.name] ? 0.4 : 1,
+                            opacity: lockedChamps[champ.name] || bannedChamps[champ.name] ? 0.4 : 1,
                         }}>
                         <Champ champ={champ} />
                     </div>
@@ -33,16 +33,31 @@ function Champs({ champs, bannedChamps, toggleBan }) {
                             left: -15,
                             cursor: "pointer",
                         }}>
+                        <div>
+                            {lockedChamps[champ.name] ? (
+                                <Tooltip title={`Allow me to get '${champ.name}'`}>
+                                    <IconButton color="primary" size="small" onClick={() => toggleLock(champ.name)}>
+                                        <Restore />
+                                    </IconButton>
+                                </Tooltip>
+                            ) : (
+                                <Tooltip title={`Don't give me '${champ.name}'`}>
+                                    <IconButton color="secondary" size="small" onClick={() => toggleLock(champ.name)}>
+                                        <Close />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+                        </div>
                         {bannedChamps[champ.name] ? (
-                            <Tooltip title={`Allow getting '${champ.name}'`}>
+                            <Tooltip title={`Allow everyone to get '${champ.name}'`}>
                                 <IconButton color="primary" size="small" onClick={() => toggleBan(champ.name)}>
                                     <Restore />
                                 </IconButton>
                             </Tooltip>
                         ) : (
-                            <Tooltip title={`Don't give me '${champ.name}'`}>
+                            <Tooltip title={`Don't give anyone '${champ.name}'`}>
                                 <IconButton color="secondary" size="small" onClick={() => toggleBan(champ.name)}>
-                                    <Close />
+                                    <Delete />
                                 </IconButton>
                             </Tooltip>
                         )}

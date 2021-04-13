@@ -32,6 +32,8 @@ const settings = {
     // [SETTING_MATCH_ROLES]: { value: true, description: "Ensure that both teams have the same roles" },
 };
 
+const bans = {};
+
 export function connectSocketio(io) {
     io.on("connection", (socket) => {
         console.log("a user connected", socket.id, socket.handshake.query.name);
@@ -39,10 +41,11 @@ export function connectSocketio(io) {
         socket.emit("settings", { settings });
         const team = chooseTeam();
         const name = getValidName(socket.handshake.query.name);
-        const bans = getValidBans(socket.handshake.query.bansString);
-        users.set(socket.id, { id: socket.id, name, team, champ: DEFAULT_CHAMP, bans });
+        const locks = getValidLocks(socket.handshake.query.locksString);
+        users.set(socket.id, { id: socket.id, name, team, champ: DEFAULT_CHAMP, locks });
         notifyUsers();
         resetHistory();
+        io.emit("bans", { champs: bans });
 
         io.emit("notification", {
             message: `'${users.get(socket.id).name}' was connected.`,
@@ -116,10 +119,20 @@ export function connectSocketio(io) {
             }
         });
 
-        socket.on("ban", ({ champName }) => {
+        socket.on("lock", ({ champName }) => {
             if (_.isString(champName)) {
                 const user = users.get(socket.id);
-                user.bans[champName] = !user.bans[champName];
+                user.locks[champName] = !user.locks[champName];
+            }
+        });
+
+        socket.on("ban", ({ champName }) => {
+            if (_.isString(champName)) {
+                bans[champName] = !bans[champName];
+                io.emit("bans", { champs: { [champName]: bans[champName] } });
+                if (!bans[champName]) {
+                    delete bans[champName];
+                }
             }
         });
 
@@ -168,7 +181,7 @@ export function connectSocketio(io) {
                 shuffledUsers[i].team = teamGroups[i % 2];
             }
 
-            const takenChamps = new Set();
+            const takenChamps = {};
             for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
                 const team = teams[teamIndex];
                 const shouldMirror = settings[SETTING_MIRROR].value && teamIndex === 1;
@@ -179,16 +192,15 @@ export function connectSocketio(io) {
                         user.champ = teams[0][userIndex].champ;
                         user.talent = teams[0][userIndex].talent;
                     } else {
-                        let bans = user.bans;
+                        const blacklists = [takenChamps, user.locks, bans];
                         if (settings[SETTING_MIRROR].value && teams[1][userIndex]) {
-                            bans = { ...bans, ...teams[1][userIndex].bans };
+                            blacklists.push(teams[1][userIndex].locks);
                         }
-                        user.champ = getRandomChamp(settings, takenChamps, bans);
-                        if (user.champ) {
-                            takenChamps.add(user.champ);
-                        } else {
+                        user.champ = getRandomChamp(settings, Object.assign(...blacklists));
+                        if (!user.champ) {
                             user.champ = DEFAULT_CHAMP;
                         }
+                        takenChamps[user.champ.name] = true;
                         user.talent = settings[SETTING_TALENT].value ? _.sample(user.champ.talents) : undefined;
                     }
                 }
@@ -218,11 +230,11 @@ function getValidName(name) {
     return name && _.isString(name) ? name.substring(0, 16) : getRandomName();
 }
 
-function getValidBans(bansString) {
+function getValidLocks(locksString) {
     try {
-        const bans = JSON.parse(bansString);
-        if (_.isPlainObject(bans)) {
-            return bans;
+        const locks = JSON.parse(locksString);
+        if (_.isPlainObject(locks)) {
+            return locks;
         }
     } catch {}
     return {};

@@ -25,6 +25,7 @@ function App() {
     const [notificationKey, setNotificationKey] = useState(0);
     const [hasUndo, setHasUndo] = useState();
     const [hasRedo, setHasRedo] = useState();
+    const [lockedChamps, setLockedChamps] = useState({});
     const [bannedChamps, setBannedChamps] = useState({});
 
     // Connect on load
@@ -34,10 +35,10 @@ function App() {
         const domain = isLocalHost ? `http://${window.location.hostname}:5000` : window.location.hostname;
 
         const query = getConnectQuery();
-        if (query.bansString) {
+        if (query.locksString) {
             try {
-                const bans = JSON.parse(query.bansString);
-                setBannedChamps(bans);
+                const locks = JSON.parse(query.locksString);
+                setLockedChamps(locks);
             } catch {}
         }
         setSocket(io(domain, { reconnection: false, query }));
@@ -67,6 +68,9 @@ function App() {
             socket.on("history", ({ undo, redo }) => {
                 setHasUndo(undo);
                 setHasRedo(redo);
+            });
+            socket.on("bans", ({ champs }) => {
+                setBannedChamps((bannedChamps) => ({ ...bannedChamps, ...champs }));
             });
         }
     }, [socket]);
@@ -123,20 +127,27 @@ function App() {
         setOpenNotification(false);
     };
 
+    const toggleLock = useCallback(
+        (champName) => {
+            socket.emit("lock", { champName });
+            setLockedChamps((lockedChamps) => {
+                const newLocks = { ...lockedChamps };
+                newLocks[champName] = !newLocks[champName];
+                if (!newLocks[champName]) {
+                    delete newLocks[champName];
+                }
+                try {
+                    localStorage.setItem("bans", JSON.stringify(newLocks));
+                } catch {}
+                return newLocks;
+            });
+        },
+        [socket]
+    );
+
     const toggleBan = useCallback(
         (champName) => {
             socket.emit("ban", { champName });
-            setBannedChamps((bannedChamps) => {
-                const newBans = { ...bannedChamps };
-                newBans[champName] = !newBans[champName];
-                if (!newBans[champName]) {
-                    delete newBans[champName];
-                }
-                try {
-                    localStorage.setItem("bans", JSON.stringify(newBans));
-                } catch {}
-                return newBans;
-            });
         },
         [socket]
     );
@@ -185,7 +196,13 @@ function App() {
                         style={{
                             marginTop: "auto",
                         }}>
-                        <Champs champs={champs} bannedChamps={bannedChamps} toggleBan={toggleBan} />
+                        <Champs
+                            champs={champs}
+                            lockedChamps={lockedChamps}
+                            toggleLock={toggleLock}
+                            bannedChamps={bannedChamps}
+                            toggleBan={toggleBan}
+                        />
                     </div>
                 </>
             )}
@@ -211,8 +228,8 @@ function getConnectQuery() {
         query.name = name || "";
     } catch {}
     try {
-        const bansString = localStorage.getItem("bans");
-        query.bansString = bansString || "";
+        const locksString = localStorage.getItem("bans");
+        query.locksString = locksString || "";
     } catch {}
     return query;
 }

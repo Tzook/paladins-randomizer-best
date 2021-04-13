@@ -30,13 +30,13 @@ export async function addChamp(champ) {
     });
 }
 
-export function getRandomChamp(settings, bannedChampsSet, bannedChampsObject) {
+export function getRandomChamp(settings, blacklist) {
     let availableChamps = [];
     for (let roleName in ROLE_TO_DATA) {
         if (settings[roleName].value) {
             const roleData = ROLE_TO_DATA[roleName];
             for (const champ of roles[roleData]) {
-                if (!bannedChampsSet.has(champ) && !bannedChampsObject[champ.name]) {
+                if (!blacklist[champ.name]) {
                     availableChamps.push(champ);
                 }
             }
