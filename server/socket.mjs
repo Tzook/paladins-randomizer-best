@@ -130,6 +130,11 @@ export function connectSocketio(io) {
             if (_.isString(champName)) {
                 bans[champName] = !bans[champName];
                 io.emit("bans", { champs: { [champName]: bans[champName] } });
+                io.emit("notification", {
+                    message: `Champ '${champName}' ${bans[champName] ? "" : "un"}banned by '${
+                        users.get(socket.id).name
+                    }'.`,
+                });
                 if (!bans[champName]) {
                     delete bans[champName];
                 }

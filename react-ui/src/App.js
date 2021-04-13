@@ -116,9 +116,8 @@ function App() {
         [socket]
     );
     const reconnect = useCallback(() => {
-        socket.io.opts.query = { ...socket.io.opts.query, ...getConnectQuery() };
-        socket.connect();
-    }, [socket]);
+        window.location.reload();
+    }, []);
 
     const closeNotification = (event, reason) => {
         if (reason === "clickaway") {
@@ -213,7 +212,7 @@ function App() {
                 }}
                 key={notificationKey}
                 open={openNotification}
-                autoHideDuration={4000}
+                autoHideDuration={3000}
                 onClose={closeNotification}
                 message={notificationMessage}
             />
