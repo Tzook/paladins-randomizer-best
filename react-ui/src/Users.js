@@ -16,11 +16,7 @@ function Users({ users, scramble, yourId, sendNewName, settings, updateSetting, 
                 alignItems: "flex-start",
                 justifyContent: "center",
             }}>
-            <div
-                style={{
-                    width: USER_SIZE,
-                    marginRight: "80px",
-                }}>
+            <div style={{ width: USER_SIZE }}>
                 {teamA.map((user) => (
                     <div
                         key={user.id}
@@ -31,7 +27,10 @@ function Users({ users, scramble, yourId, sendNewName, settings, updateSetting, 
                     </div>
                 ))}
             </div>
-            <div>
+            <div
+                style={{
+                    margin: "0 80px",
+                }}>
                 <h2>VS</h2>
 
                 <FormGroup>
@@ -52,7 +51,7 @@ function Users({ users, scramble, yourId, sendNewName, settings, updateSetting, 
 
                 <div
                     style={{
-                        marginTop: "12px",
+                        margin: "12px -40px",
                     }}>
                     <Tooltip title="Undo">
                         <span>
@@ -73,11 +72,7 @@ function Users({ users, scramble, yourId, sendNewName, settings, updateSetting, 
                     </Tooltip>
                 </div>
             </div>
-            <div
-                style={{
-                    width: USER_SIZE,
-                    marginLeft: "80px",
-                }}>
+            <div style={{ width: USER_SIZE }}>
                 {teamB.map((user) => (
                     <div
                         key={user.id}
