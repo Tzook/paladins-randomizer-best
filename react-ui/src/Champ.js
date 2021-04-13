@@ -30,7 +30,7 @@ function Champ({ champ, size = CHAMP_IMAGE_SIZE }) {
                 style={{
                     outline: `1px solid ${ROLE_DATA_TO_BORDER_COLOR[champ.role]}`,
                     display: "block",
-                    boxShadow: "4px 4px 8px 0px black",
+                    boxShadow: "2px 2px 4px black",
                 }}
                 src={champ.image}
                 width={size}
