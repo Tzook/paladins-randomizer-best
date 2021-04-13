@@ -8,7 +8,7 @@ function Champs({ champs, lockedChamps, toggleLock, bannedChamps, toggleBan }) {
             style={{
                 display: "grid",
                 gridAutoFlow: "row",
-                gridGap: 12,
+                gridGap: 16,
                 gridTemplateColumns: `repeat(auto-fill, ${CHAMP_IMAGE_SIZE}px)`,
                 justifyContent: "center",
                 maxWidth: "1200px",

@@ -34,6 +34,7 @@ function User({ user, yourId, sendNewName, kick }) {
             style={{
                 position: "relative",
                 width: USER_SIZE,
+                boxShadow: user.id === yourId ? "0 0 20px 6px white" : "",
             }}>
             <Champ champ={user.champ} size={USER_SIZE} />
             <div
