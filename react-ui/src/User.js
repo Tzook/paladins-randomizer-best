@@ -90,7 +90,7 @@ function User({ user, yourId, sendNewName, kick, champs }) {
                                 <Close />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title="View bans">
+                        <Tooltip title="Champs">
                             <IconButton color="secondary" size="small" onClick={showBans}>
                                 <RemoveRedEye />
                             </IconButton>

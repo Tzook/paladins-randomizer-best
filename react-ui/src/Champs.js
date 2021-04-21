@@ -79,7 +79,7 @@ function Champs({ champs, lockedChamps = {}, toggleLock, bannedChamps = {}, togg
                                 right: 0,
                                 textAlign: "center",
                             }}>
-                            <Tooltip title={`'${champ.name}' is locked`}>
+                            <Tooltip title={`'${champ.name}' is banned`}>
                                 <IconButton color="secondary" size="small">
                                     <Lock />
                                 </IconButton>
