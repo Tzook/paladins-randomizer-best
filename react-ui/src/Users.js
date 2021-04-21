@@ -1,6 +1,7 @@
 import { Button, FormControlLabel, FormGroup, IconButton, Switch, Tooltip } from "@material-ui/core";
 import User, { USER_SIZE } from "./User";
 import { Redo, Undo } from "@material-ui/icons";
+import { useCallback, useState } from "react";
 
 const TEAM_NAME_A = "a";
 const TEAM_NAME_B = "b";
@@ -19,6 +20,16 @@ function Users({
     hasRedo,
     champs,
 }) {
+    const [inScrambleCooldown, setInScrambleCooldown] = useState(false);
+
+    const scrambleClicked = useCallback(() => {
+        if (!inScrambleCooldown) {
+            scramble();
+            setInScrambleCooldown(true);
+            setTimeout(() => setInScrambleCooldown(false), 1000);
+        }
+    }, [scramble, inScrambleCooldown]);
+
     const teamA = users.filter((user) => user.team === TEAM_NAME_A);
     const teamB = users.filter((user) => user.team === TEAM_NAME_B);
 
@@ -73,7 +84,7 @@ function Users({
                             </IconButton>
                         </span>
                     </Tooltip>
-                    <Button variant="contained" color="primary" onClick={scramble}>
+                    <Button variant="contained" color="primary" onClick={scrambleClicked}>
                         Scramble!
                     </Button>
                     <Tooltip title="Redo">
