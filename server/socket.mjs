@@ -74,6 +74,10 @@ export function connectSocketio(io) {
         socket.on("setting", ({ setting }) => {
             if (settings.hasOwnProperty(setting)) {
                 settings[setting].value = !settings[setting].value;
+                if (setting === SETTING_TALENT) {
+                    updateTalents();
+                    notifyUsers();
+                }
                 io.emit("settings", { settings });
                 io.emit("notification", {
                     message: `Setting '${setting}' was toggled by '${users.get(socket.id).name}'.`,
@@ -200,7 +204,6 @@ export function connectSocketio(io) {
 
                     if (shouldMirror) {
                         user.champ = teams[0][userIndex].champ;
-                        user.talent = teams[0][userIndex].talent;
                     } else {
                         const blacklists = [takenChamps, user.locks, bans];
                         if (settings[SETTING_MIRROR].value && teams[1][userIndex]) {
@@ -211,13 +214,28 @@ export function connectSocketio(io) {
                             user.champ = DEFAULT_CHAMP;
                         }
                         takenChamps[user.champ.name] = true;
-                        user.talent = settings[SETTING_TALENT].value ? _.sample(user.champ.talents) : undefined;
                     }
                 }
             }
+            updateTalents();
             notifyUsers();
         }
     });
+
+    function updateTalents() {
+        const champsTalents = {};
+        for (const [, user] of users) {
+            if (!settings[SETTING_TALENT].value) {
+                user.talent = undefined;
+                continue;
+            }
+            const champName = user.champ.name;
+            if (!settings[SETTING_MIRROR].value || !champsTalents[champName]) {
+                champsTalents[champName] = _.sample(user.champ.talents);
+            }
+            user.talent = champsTalents[champName];
+        }
+    }
 
     function notifyUsers() {
         io.emit("users", { users: [...users.values()] });
