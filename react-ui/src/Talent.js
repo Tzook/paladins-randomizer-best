@@ -2,6 +2,7 @@ import { IconButton, withStyles } from "@material-ui/core";
 import Tooltip from "@material-ui/core/Tooltip";
 import { ErrorOutline } from "@material-ui/icons";
 import { useState } from "react";
+import { ICON_DROP_SHADOW } from "./constants";
 
 export const TALENT_IMAGE_SIZE = 64;
 
@@ -23,7 +24,7 @@ function Talent({ talent }) {
     return (
         <TalentTooltip title={talent.name} arrow>
             {hadError ? (
-                <IconButton style={{ background: "white" }} color="secondary" size="small">
+                <IconButton style={ICON_DROP_SHADOW} color="secondary" size="small">
                     <ErrorOutline fontSize="large" />
                 </IconButton>
             ) : (

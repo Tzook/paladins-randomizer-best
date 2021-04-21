@@ -92,6 +92,14 @@ export function connectSocketio(io) {
             io.emit("notification", { message: `Scrambled by '${users.get(socket.id).name}'.` });
         });
 
+        socket.on("scrambleSelf", () => {
+            storeHistoryArray(usersHistory);
+            notifyHistory();
+            scrambleOne(users.get(socket.id));
+            notifyUsers();
+            io.emit("notification", { message: `Self scrambled by '${users.get(socket.id).name}'.` });
+        });
+
         socket.on("kick", ({ id }) => {
             if (users.has(id)) {
                 io.emit("notification", {
@@ -219,6 +227,31 @@ export function connectSocketio(io) {
             }
             updateTalents();
             notifyUsers();
+        }
+
+        function scrambleOne(user) {
+            const usersToReplace = [user];
+            const takenChamps = {};
+            const blacklists = [takenChamps, user.locks, bans];
+            for (const [, currentUser] of users) {
+                takenChamps[currentUser.champ.name] = true;
+                // Find a mirrored user
+                if (
+                    settings[SETTING_MIRROR].value &&
+                    currentUser.champ === user.champ &&
+                    currentUser.team !== user.team &&
+                    usersToReplace.length < 2
+                ) {
+                    usersToReplace.push(currentUser);
+                    blacklists.push(currentUser.locks);
+                }
+            }
+            const champ = getRandomChamp(settings, Object.assign(...blacklists)) || DEFAULT_CHAMP;
+            const talent = settings[SETTING_TALENT].value ? _.sample(champ.talents) : undefined;
+            for (const userToReplace of usersToReplace) {
+                userToReplace.champ = champ;
+                userToReplace.talent = talent;
+            }
         }
     });
 

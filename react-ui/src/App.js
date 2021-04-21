@@ -89,6 +89,10 @@ function App() {
         socket.emit("scramble");
     }, [socket]);
 
+    const scrambleSelf = useCallback(() => {
+        socket.emit("scrambleSelf");
+    }, [socket]);
+
     const undo = useCallback(() => {
         socket.emit("undo");
     }, [socket]);
@@ -180,6 +184,7 @@ function App() {
                         <Users
                             users={users}
                             scramble={scramble}
+                            scrambleSelf={scrambleSelf}
                             yourId={yourId}
                             sendNewName={sendNewName}
                             settings={settings}

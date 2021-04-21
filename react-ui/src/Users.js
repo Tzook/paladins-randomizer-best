@@ -2,6 +2,7 @@ import { Button, FormControlLabel, FormGroup, IconButton, Switch, Tooltip } from
 import User, { USER_SIZE } from "./User";
 import { Redo, Undo } from "@material-ui/icons";
 import { useCallback, useEffect, useState } from "react";
+import { ICON_DROP_SHADOW } from "./constants";
 
 const TEAM_NAME_A = "a";
 const TEAM_NAME_B = "b";
@@ -9,6 +10,7 @@ const TEAM_NAME_B = "b";
 function Users({
     users,
     scramble,
+    scrambleSelf,
     yourId,
     sendNewName,
     settings,
@@ -34,6 +36,13 @@ function Users({
             setInScrambleCooldown(true);
         }
     }, [scramble, inScrambleCooldown]);
+
+    const scrambleSelfClicked = useCallback(() => {
+        if (!inScrambleCooldown) {
+            scrambleSelf();
+            setInScrambleCooldown(true);
+        }
+    }, [scrambleSelf, inScrambleCooldown]);
 
     const undoClicked = useCallback(() => {
         if (!inScrambleCooldown) {
@@ -66,7 +75,14 @@ function Users({
                         style={{
                             marginBottom: "16px",
                         }}>
-                        <User user={user} yourId={yourId} sendNewName={sendNewName} kick={kick} champs={champs} />
+                        <User
+                            user={user}
+                            yourId={yourId}
+                            sendNewName={sendNewName}
+                            kick={kick}
+                            champs={champs}
+                            scrambleSelf={scrambleSelfClicked}
+                        />
                     </div>
                 ))}
             </div>
@@ -98,7 +114,11 @@ function Users({
                     }}>
                     <Tooltip title="Undo">
                         <span>
-                            <IconButton disabled={!hasUndo} color="secondary" onClick={undoClicked}>
+                            <IconButton
+                                style={ICON_DROP_SHADOW}
+                                disabled={!hasUndo}
+                                color="secondary"
+                                onClick={undoClicked}>
                                 <Undo />
                             </IconButton>
                         </span>
@@ -108,7 +128,11 @@ function Users({
                     </Button>
                     <Tooltip title="Redo">
                         <span>
-                            <IconButton disabled={!hasRedo} color="secondary" onClick={redoClicked}>
+                            <IconButton
+                                style={ICON_DROP_SHADOW}
+                                disabled={!hasRedo}
+                                color="secondary"
+                                onClick={redoClicked}>
                                 <Redo />
                             </IconButton>
                         </span>
@@ -122,7 +146,14 @@ function Users({
                         style={{
                             marginBottom: "16px",
                         }}>
-                        <User user={user} yourId={yourId} sendNewName={sendNewName} kick={kick} champs={champs} />
+                        <User
+                            user={user}
+                            yourId={yourId}
+                            sendNewName={sendNewName}
+                            kick={kick}
+                            champs={champs}
+                            scrambleSelf={scrambleSelf}
+                        />
                     </div>
                 ))}
             </div>

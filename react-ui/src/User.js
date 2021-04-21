@@ -1,13 +1,14 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from "@material-ui/core";
-import { Close, InsertEmoticon, RemoveRedEye } from "@material-ui/icons";
+import { Close, InsertEmoticon, RemoveRedEye, Shuffle } from "@material-ui/icons";
 import { useCallback, useState } from "react";
 import Champ from "./Champ";
 import Champs from "./Champs";
+import { ICON_DROP_SHADOW } from "./constants";
 import Talent from "./Talent";
 
 export const USER_SIZE = 86;
 
-function User({ user, yourId, sendNewName, kick, champs }) {
+function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
     const [showBanDialog, setShowBanDialog] = useState(false);
 
     const updateName = useCallback(
@@ -78,20 +79,27 @@ function User({ user, yourId, sendNewName, kick, champs }) {
                     left: -15,
                 }}>
                 {user.id === yourId ? (
-                    <Tooltip title="This is you :)">
-                        <IconButton style={{ background: "white" }} color="primary" size="small">
-                            <InsertEmoticon />
-                        </IconButton>
-                    </Tooltip>
+                    <div>
+                        <Tooltip title="This is you :)">
+                            <IconButton style={{ background: "white" }} color="primary" size="small">
+                                <InsertEmoticon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Scramble">
+                            <IconButton style={ICON_DROP_SHADOW} color="secondary" size="small" onClick={scrambleSelf}>
+                                <Shuffle />
+                            </IconButton>
+                        </Tooltip>
+                    </div>
                 ) : (
                     <div>
                         <Tooltip title="Kick">
-                            <IconButton color="secondary" size="small" onClick={kickUser}>
+                            <IconButton style={ICON_DROP_SHADOW} color="secondary" size="small" onClick={kickUser}>
                                 <Close />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Champs">
-                            <IconButton color="secondary" size="small" onClick={showBans}>
+                            <IconButton style={ICON_DROP_SHADOW} color="secondary" size="small" onClick={showBans}>
                                 <RemoveRedEye />
                             </IconButton>
                         </Tooltip>
