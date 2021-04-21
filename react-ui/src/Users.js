@@ -1,7 +1,7 @@
 import { Button, FormControlLabel, FormGroup, IconButton, Switch, Tooltip } from "@material-ui/core";
 import User, { USER_SIZE } from "./User";
 import { Redo, Undo } from "@material-ui/icons";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const TEAM_NAME_A = "a";
 const TEAM_NAME_B = "b";
@@ -22,13 +22,32 @@ function Users({
 }) {
     const [inScrambleCooldown, setInScrambleCooldown] = useState(false);
 
+    useEffect(() => {
+        if (inScrambleCooldown) {
+            setTimeout(() => setInScrambleCooldown(false), 1000);
+        }
+    }, [inScrambleCooldown]);
+
     const scrambleClicked = useCallback(() => {
         if (!inScrambleCooldown) {
             scramble();
             setInScrambleCooldown(true);
-            setTimeout(() => setInScrambleCooldown(false), 1000);
         }
     }, [scramble, inScrambleCooldown]);
+
+    const undoClicked = useCallback(() => {
+        if (!inScrambleCooldown) {
+            undo();
+            setInScrambleCooldown(true);
+        }
+    }, [undo, inScrambleCooldown]);
+
+    const redoClicked = useCallback(() => {
+        if (!inScrambleCooldown) {
+            redo();
+            setInScrambleCooldown(true);
+        }
+    }, [redo, inScrambleCooldown]);
 
     const teamA = users.filter((user) => user.team === TEAM_NAME_A);
     const teamB = users.filter((user) => user.team === TEAM_NAME_B);
@@ -79,7 +98,7 @@ function Users({
                     }}>
                     <Tooltip title="Undo">
                         <span>
-                            <IconButton disabled={!hasUndo} color="secondary" onClick={undo}>
+                            <IconButton disabled={!hasUndo} color="secondary" onClick={undoClicked}>
                                 <Undo />
                             </IconButton>
                         </span>
@@ -89,7 +108,7 @@ function Users({
                     </Button>
                     <Tooltip title="Redo">
                         <span>
-                            <IconButton disabled={!hasRedo} color="secondary" onClick={redo}>
+                            <IconButton disabled={!hasRedo} color="secondary" onClick={redoClicked}>
                                 <Redo />
                             </IconButton>
                         </span>
