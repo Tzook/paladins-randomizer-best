@@ -189,6 +189,7 @@ function App() {
                             redo={redo}
                             hasUndo={hasUndo}
                             hasRedo={hasRedo}
+                            champs={champs}
                         />
                     </div>
                     <div

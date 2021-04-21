@@ -1,12 +1,15 @@
-import { IconButton, Tooltip } from "@material-ui/core";
-import { Close, InsertEmoticon } from "@material-ui/icons";
-import { useCallback } from "react";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from "@material-ui/core";
+import { Close, InsertEmoticon, RemoveRedEye } from "@material-ui/icons";
+import { useCallback, useState } from "react";
 import Champ from "./Champ";
+import Champs from "./Champs";
 import Talent from "./Talent";
 
 export const USER_SIZE = 86;
 
-function User({ user, yourId, sendNewName, kick }) {
+function User({ user, yourId, sendNewName, kick, champs }) {
+    const [showBanDialog, setShowBanDialog] = useState(false);
+
     const updateName = useCallback(
         (event) => {
             const text = event.target.innerText;
@@ -20,6 +23,13 @@ function User({ user, yourId, sendNewName, kick }) {
     const kickUser = useCallback(() => {
         kick(user.id);
     }, [user, kick]);
+
+    const showBans = useCallback(() => {
+        setShowBanDialog(true);
+    }, []);
+    const hideBans = useCallback(() => {
+        setShowBanDialog(false);
+    }, []);
 
     const updateNameIfDone = useCallback((event) => {
         if (event.key === "Enter") {
@@ -74,11 +84,18 @@ function User({ user, yourId, sendNewName, kick }) {
                         </IconButton>
                     </Tooltip>
                 ) : (
-                    <Tooltip title="Kick">
-                        <IconButton color="secondary" size="small" onClick={kickUser}>
-                            <Close />
-                        </IconButton>
-                    </Tooltip>
+                    <div>
+                        <Tooltip title="Kick">
+                            <IconButton color="secondary" size="small" onClick={kickUser}>
+                                <Close />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="View bans">
+                            <IconButton color="secondary" size="small" onClick={showBans}>
+                                <RemoveRedEye />
+                            </IconButton>
+                        </Tooltip>
+                    </div>
                 )}
             </div>
 
@@ -93,6 +110,18 @@ function User({ user, yourId, sendNewName, kick }) {
                     <Talent talent={user.talent} />
                 </div>
             ) : null}
+
+            <Dialog open={showBanDialog} onClose={hideBans}>
+                <DialogTitle>Champs of '{user.name}':</DialogTitle>
+                <DialogContent>
+                    <Champs champs={champs} lockedChamps={user.locks} />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={hideBans} color="primary" autoFocus>
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

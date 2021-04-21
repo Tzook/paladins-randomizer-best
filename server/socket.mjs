@@ -45,7 +45,7 @@ export function connectSocketio(io) {
         users.set(socket.id, { id: socket.id, name, team, champ: DEFAULT_CHAMP, locks });
         notifyUsers();
         resetHistory();
-        io.emit("bans", { champs: bans });
+        socket.emit("bans", { champs: bans });
 
         io.emit("notification", {
             message: `'${users.get(socket.id).name}' was connected.`,
@@ -94,6 +94,7 @@ export function connectSocketio(io) {
                     message: `'${users.get(id).name}' was kicked by '${users.get(socket.id).name}'.`,
                 });
                 users.delete(id);
+                notifyUsers();
                 resetHistory();
             }
             io.sockets.sockets.forEach((sock) => {
@@ -123,6 +124,10 @@ export function connectSocketio(io) {
             if (_.isString(champName)) {
                 const user = users.get(socket.id);
                 user.locks[champName] = !user.locks[champName];
+                notifyUsers();
+                if (!user.locks[champName]) {
+                    delete user.locks[champName];
+                }
             }
         });
 

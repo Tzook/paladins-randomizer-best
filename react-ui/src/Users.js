@@ -5,7 +5,20 @@ import { Redo, Undo } from "@material-ui/icons";
 const TEAM_NAME_A = "a";
 const TEAM_NAME_B = "b";
 
-function Users({ users, scramble, yourId, sendNewName, settings, updateSetting, kick, undo, redo, hasUndo, hasRedo }) {
+function Users({
+    users,
+    scramble,
+    yourId,
+    sendNewName,
+    settings,
+    updateSetting,
+    kick,
+    undo,
+    redo,
+    hasUndo,
+    hasRedo,
+    champs,
+}) {
     const teamA = users.filter((user) => user.team === TEAM_NAME_A);
     const teamB = users.filter((user) => user.team === TEAM_NAME_B);
 
@@ -23,7 +36,7 @@ function Users({ users, scramble, yourId, sendNewName, settings, updateSetting, 
                         style={{
                             marginBottom: "16px",
                         }}>
-                        <User user={user} yourId={yourId} sendNewName={sendNewName} kick={kick} />
+                        <User user={user} yourId={yourId} sendNewName={sendNewName} kick={kick} champs={champs} />
                     </div>
                 ))}
             </div>
@@ -79,7 +92,7 @@ function Users({ users, scramble, yourId, sendNewName, settings, updateSetting, 
                         style={{
                             marginBottom: "16px",
                         }}>
-                        <User user={user} yourId={yourId} sendNewName={sendNewName} kick={kick} />
+                        <User user={user} yourId={yourId} sendNewName={sendNewName} kick={kick} champs={champs} />
                     </div>
                 ))}
             </div>
