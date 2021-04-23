@@ -49,7 +49,12 @@ export async function loadAllChamps() {
         champ.talents.push({
             name: card.DeviceName,
             description: card.Description,
-            image: card.itemIcon_URL.replace("champion-cards", "champion-legendaries-badge").replace("jpg", "png"),
+            image: card.itemIcon_URL
+                .replace("champion-cards", "champion-legendaries-badge")
+                .replace("jpg", "png")
+                .replace("wyrm", "w.y.r.m.")
+                .replace("goddess-", "goddess'-")
+                .replace("tigrons", "tigron's"),
             level: card.talent_reward_level,
         });
     }

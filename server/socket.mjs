@@ -266,13 +266,21 @@ export function connectSocketio(io) {
         async function loadPlayerData(user) {
             user.apiData = {};
             const name = user.name;
-            const promises = [fetchPlayerDetails(name), fetchPlayerChamps(name)];
-            const [detailsResponse, champsResponse] = await Promise.all(promises);
+            const [detailsResponse, champsResponse] = await Promise.all([
+                fetchPlayerDetails(name),
+                fetchPlayerChamps(name),
+            ]);
             if (name !== user.name) {
                 // The name has changed, don't use this anymore.
                 return;
             }
-            if (!detailsResponse || !detailsResponse.length || detailsResponse[0].ret_msg) {
+            if (
+                !detailsResponse ||
+                !detailsResponse.length ||
+                detailsResponse[0].ret_msg ||
+                !champsResponse ||
+                !champsResponse.length
+            ) {
                 user.apiData = {
                     error: true,
                 };
