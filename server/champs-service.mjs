@@ -42,14 +42,15 @@ export async function loadAllChamps() {
         return;
     }
     for (const card of allCards) {
-        if (card.rarity !== "Legendary") {
+        if (card.item_type !== "Inventory Vendor - Talents") {
             continue;
         }
         const champ = champsById[card.champion_id];
         champ.talents.push({
-            name: card.card_name,
-            description: card.card_description,
-            image: card.championTalent_URL,
+            name: card.DeviceName,
+            description: card.Description,
+            image: card.itemIcon_URL.replace("champion-cards", "champion-legendaries-badge").replace("jpg", "png"),
+            level: card.talent_reward_level,
         });
     }
     console.log("Successfully loaded all champs");

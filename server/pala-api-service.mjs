@@ -31,7 +31,7 @@ export async function fetchAllChamps() {
 }
 
 export async function fetchAllChampsCards() {
-    return getDataApi("getchampioncards", -1, 1);
+    return getDataApi("getitems", 1);
 }
 
 async function getDataApi(apiMethodName, ...params) {
@@ -40,7 +40,6 @@ async function getDataApi(apiMethodName, ...params) {
         return console.error("oops, no sessionId");
     }
     const dataResponse = await fetchApi(apiMethodName, "/" + params.join("/"));
-    // console.log(dataResponse);
     return dataResponse;
 }
 
