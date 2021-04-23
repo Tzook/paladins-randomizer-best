@@ -3,12 +3,13 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
+    DialogContentText,
     DialogTitle,
     IconButton,
     TextField,
     Tooltip,
 } from "@material-ui/core";
-import { Close, Edit, RemoveRedEye, Shuffle } from "@material-ui/icons";
+import { Close, Edit, Person, RemoveRedEye, Shuffle } from "@material-ui/icons";
 import { useCallback, useRef, useState } from "react";
 import Champ from "./Champ";
 import Champs from "./Champs";
@@ -21,6 +22,7 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
     const userNameFieldRef = useRef(null);
     const [showBanDialog, setShowBanDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
+    const [showInfoDialog, setShowInfoDialog] = useState(false);
 
     const kickUser = useCallback(() => {
         kick(user.id);
@@ -48,6 +50,12 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
         },
         [hideEdit, userNameFieldRef, user, sendNewName]
     );
+    const showInfo = useCallback(() => {
+        setShowInfoDialog(true);
+    }, []);
+    const hideInfo = useCallback(() => {
+        setShowInfoDialog(false);
+    }, []);
 
     return (
         <div
@@ -79,7 +87,7 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                     left: -15,
                 }}>
                 {user.id === yourId ? (
-                    <div>
+                    <span>
                         <Tooltip title="This is you! - Click to edit">
                             <IconButton style={{ background: "white" }} color="primary" size="small" onClick={showEdit}>
                                 <Edit />
@@ -106,14 +114,17 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                                 </form>
                             </DialogContent>
                             <DialogActions>
+                                <Button onClick={hideEdit} color="secondary">
+                                    Cancel
+                                </Button>
                                 <Button onClick={saveEdit} color="primary">
                                     Save
                                 </Button>
                             </DialogActions>
                         </Dialog>
-                    </div>
+                    </span>
                 ) : (
-                    <div>
+                    <span>
                         <Tooltip title="Kick">
                             <IconButton style={ICON_DROP_SHADOW} color="secondary" size="small" onClick={kickUser}>
                                 <Close />
@@ -140,8 +151,41 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                                 </Button>
                             </DialogActions>
                         </Dialog>
-                    </div>
+                    </span>
                 )}
+
+                <Tooltip title="Profile">
+                    <IconButton style={ICON_DROP_SHADOW} color="secondary" size="small" onClick={showInfo}>
+                        <Person />
+                        {(user.apiData || {}).level || null}
+                    </IconButton>
+                </Tooltip>
+
+                <Dialog open={showInfoDialog} onClose={hideInfo}>
+                    <DialogTitle>Profile of '{user.name}':</DialogTitle>
+                    <DialogContent>
+                        {user.apiData.level ? (
+                            <div>
+                                <DialogContentText>Level: {user.apiData.level}</DialogContentText>
+                                <DialogContentText>
+                                    Win rate:{" "}
+                                    {Math.round((100 * user.apiData.wins) / (user.apiData.wins + user.apiData.losses))}%
+                                </DialogContentText>
+                                <DialogContentText>Steam name: {user.apiData.irlName}</DialogContentText>
+                            </div>
+                        ) : (
+                            <div>
+                                Couldn't fetch data for '{user.name}'. The player either does not exist, or has their
+                                setting set to private.
+                            </div>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={hideInfo} color="primary" autoFocus>
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
 
             {user.talent ? (
