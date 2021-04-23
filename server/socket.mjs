@@ -331,7 +331,13 @@ function chooseTeam() {
 }
 
 function getValidName(name) {
-    return name && _.isString(name) ? name.substring(0, 16) : getRandomName();
+    if (_.isString(name)) {
+        name = name.replace(/[^a-zA-Z0-9]/g, "").substring(0, 16);
+    }
+    if (!name) {
+        name = getRandomName();
+    }
+    return name;
 }
 
 function getValidLocks(locksString) {
