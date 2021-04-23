@@ -1,9 +1,14 @@
-import { getChampFileName } from "./champs-crawler.mjs";
-import fs from "fs";
+import { fetchAllChamps, fetchAllChampsCards } from "./pala-api-service.mjs";
 import _ from "lodash";
-import { ROLE_FRONTLINE, ROLE_SUPPORT, ROLE_DAMAGE, ROLE_FLANK } from "./socket.mjs";
+
+export const ROLE_FRONTLINE = "Frontline";
+export const ROLE_SUPPORT = "Support";
+export const ROLE_DAMAGE = "Damage";
+export const ROLE_FLANK = "Flank";
 
 const roles = {};
+const champsById = {};
+export const lockableChamps = {};
 const ROLE_TO_DATA = {
     [ROLE_FRONTLINE]: "Paladins Front Line",
     [ROLE_SUPPORT]: "Paladins Support",
@@ -11,23 +16,43 @@ const ROLE_TO_DATA = {
     [ROLE_FLANK]: "Paladins Flanker",
 };
 
-/**
- * @param {{
- * name: string,
- * role: string,
- * image: string,
- * }} champ
- */
-export async function addChamp(champ) {
-    fs.readFile(getChampFileName(champ.name), (error, data) => {
-        if (error) {
-            return console.error(`Had an error loading champ json: '${champ.name}'`);
+export async function loadAllChamps() {
+    const [allChamps, allCards] = await Promise.all([fetchAllChamps(), fetchAllChampsCards()]);
+    if (!allChamps || !allChamps.length) {
+        console.error("Failed to load all champs", allChamps);
+        return;
+    }
+    for (const champ of allChamps) {
+        const champFormatted = {
+            name: champ.Name,
+            role: champ.Roles,
+            image: champ.ChampionIcon_URL,
+            id: champ.id,
+            talents: [],
+        };
+        if (!(champ.OnFreeRotation || champ.OnFreeWeeklyRotation)) {
+            lockableChamps[champFormatted.name] = true;
         }
-        const champJson = JSON.parse(data);
-        const champFormatted = formatChamp(champ, champJson);
         roles[champFormatted.role] = roles[champFormatted.role] || [];
         roles[champFormatted.role].push(champFormatted);
-    });
+        champsById[champFormatted.id] = champFormatted;
+    }
+    if (!allCards || !allCards.length) {
+        console.error("Failed to load all champs cards", allCards);
+        return;
+    }
+    for (const card of allCards) {
+        if (card.rarity !== "Legendary") {
+            continue;
+        }
+        const champ = champsById[card.champion_id];
+        champ.talents.push({
+            name: card.card_name,
+            description: card.card_description,
+            image: card.championTalent_URL,
+        });
+    }
+    console.log("Successfully loaded all champs");
 }
 
 export function getRandomChamp(settings, blacklist) {
@@ -47,35 +72,4 @@ export function getRandomChamp(settings, blacklist) {
 
 export function getAllChamps() {
     return _.sortBy(_.flatten(Object.values(roles)), "name");
-}
-
-/**
- *
- * @param {{
- * name: string,
- * role: string,
- * image: string,
- * }} champ
- * @param {[{
- * cards: [{
- * card_description: string,
- * card_name: string,
- * championCard_URL: string,
- * rarity: "Common"|"Legendary",
- * }]
- * }]} champJson
- */
-function formatChamp(champ, champJson) {
-    return {
-        name: champ.name,
-        role: champ.role,
-        image: champ.image,
-        talents: champJson[0].cards
-            .filter((talent) => talent.rarity === "Legendary")
-            .map((talent) => ({
-                name: talent.card_name,
-                description: talent.card_description,
-                image: talent.championTalent_URL,
-            })),
-    };
 }

@@ -122,7 +122,11 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
             <Dialog open={showBanDialog} onClose={hideBans}>
                 <DialogTitle>Champs of '{user.name}':</DialogTitle>
                 <DialogContent>
-                    <Champs champs={champs} lockedChamps={user.locks} />
+                    <Champs
+                        champs={champs}
+                        lockedChamps={user.locks}
+                        apiUnownedChamps={(user.apiData || {}).unownedChamps}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={hideBans} color="primary" autoFocus>

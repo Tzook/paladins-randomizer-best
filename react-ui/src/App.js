@@ -155,6 +155,8 @@ function App() {
         [socket]
     );
 
+    const yourUser = users.find((user) => user.id === yourId) || {};
+
     console.log(champs, users);
     return (
         <div
@@ -207,6 +209,7 @@ function App() {
                             toggleLock={toggleLock}
                             bannedChamps={bannedChamps}
                             toggleBan={toggleBan}
+                            apiUnownedChamps={(yourUser.apiData || {}).unownedChamps}
                         />
                     </div>
                 </>

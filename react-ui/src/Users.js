@@ -111,11 +111,13 @@ function Users({
                 <div
                     style={{
                         margin: "12px -40px",
+                        transition: "opacity .3s",
+                        opacity: inScrambleCooldown ? 0.4 : 1,
                     }}>
                     <Tooltip title="Undo">
                         <span>
                             <IconButton
-                                style={ICON_DROP_SHADOW}
+                                style={{ ...ICON_DROP_SHADOW, cursor: inScrambleCooldown ? "not-allowed" : "" }}
                                 disabled={!hasUndo}
                                 color="secondary"
                                 onClick={undoClicked}>
@@ -123,13 +125,19 @@ function Users({
                             </IconButton>
                         </span>
                     </Tooltip>
-                    <Button variant="contained" color="primary" onClick={scrambleClicked}>
+                    <Button
+                        style={{
+                            cursor: inScrambleCooldown ? "not-allowed" : "",
+                        }}
+                        variant="contained"
+                        color="primary"
+                        onClick={scrambleClicked}>
                         Scramble!
                     </Button>
                     <Tooltip title="Redo">
                         <span>
                             <IconButton
-                                style={ICON_DROP_SHADOW}
+                                style={{ ...ICON_DROP_SHADOW, cursor: inScrambleCooldown ? "not-allowed" : "" }}
                                 disabled={!hasRedo}
                                 color="secondary"
                                 onClick={redoClicked}>

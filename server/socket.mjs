@@ -1,7 +1,15 @@
 import _ from "lodash";
-import { getRandomChamp } from "./champs-service.mjs";
-import { getAllChamps } from "./champs-service.mjs";
+import {
+    getRandomChamp,
+    getAllChamps,
+    ROLE_FRONTLINE,
+    ROLE_SUPPORT,
+    ROLE_DAMAGE,
+    ROLE_FLANK,
+} from "./champs-service.mjs";
+import { fetchPlayerDetails, fetchPlayerChamps } from "./pala-api-service.mjs";
 import { getRandomName } from "mmo-name-generator";
+import { lockableChamps } from "./champs-service.mjs";
 
 const users = new Map();
 let usersHistory = [];
@@ -12,13 +20,8 @@ const DEFAULT_CHAMP = {
     image: "https://yt3.ggpht.com/ytc/AAUvwng8YX7GkjTTqETCOLTE0BC0EkTq07OJmjMD1AFY=s88-c-k-c0x00ffffff-no-rj",
 };
 
-export const ROLE_FRONTLINE = "Frontline";
-export const ROLE_SUPPORT = "Support";
-export const ROLE_DAMAGE = "Damage";
-export const ROLE_FLANK = "Flank";
 const SETTING_MIRROR = "Mirror";
 const SETTING_TALENT = "Random Talent";
-// const SETTING_MATCH_ROLES = "Match Roles";
 
 const TEAM_NAME_A = "a";
 const TEAM_NAME_B = "b";
@@ -29,7 +32,6 @@ const settings = {
     [ROLE_FLANK]: { value: true, description: "Enable flank roles" },
     [SETTING_MIRROR]: { value: false, description: "Make both teams the same champions" },
     [SETTING_TALENT]: { value: false, description: "Tells you which talent to pick on the champion" },
-    // [SETTING_MATCH_ROLES]: { value: true, description: "Ensure that both teams have the same roles" },
 };
 
 const bans = {};
@@ -42,7 +44,9 @@ export function connectSocketio(io) {
         const team = chooseTeam();
         const name = getValidName(socket.handshake.query.name);
         const locks = getValidLocks(socket.handshake.query.locksString);
-        users.set(socket.id, { id: socket.id, name, team, champ: DEFAULT_CHAMP, locks });
+        const user = { id: socket.id, name, team, champ: DEFAULT_CHAMP, locks };
+        users.set(socket.id, user);
+        loadPlayerData(user);
         notifyUsers();
         resetHistory();
         socket.emit("bans", { champs: bans });
@@ -64,11 +68,15 @@ export function connectSocketio(io) {
 
         socket.on("name", ({ newName }) => {
             const name = getValidName(newName);
-            io.emit("notification", {
-                message: `Name of '${users.get(socket.id).name}' was updated to '${name}'.`,
-            });
-            users.get(socket.id).name = name;
-            notifyUsers();
+            const user = users.get(socket.id);
+            if (user.name !== name) {
+                io.emit("notification", {
+                    message: `Name of '${users.get(socket.id).name}' was updated to '${name}'.`,
+                });
+                user.name = name;
+                loadPlayerData(user);
+                notifyUsers();
+            }
         });
 
         socket.on("setting", ({ setting }) => {
@@ -206,18 +214,18 @@ export function connectSocketio(io) {
             const takenChamps = {};
             for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
                 const team = teams[teamIndex];
-                const shouldMirror = settings[SETTING_MIRROR].value && teamIndex === 1;
                 for (let userIndex = 0; userIndex < team.length; userIndex++) {
                     const user = team[userIndex];
 
-                    if (shouldMirror) {
+                    if (settings[SETTING_MIRROR].value && teamIndex === 1) {
                         user.champ = teams[0][userIndex].champ;
                     } else {
-                        const blacklists = [takenChamps, user.locks, bans];
+                        const blacklists = [takenChamps, user.locks, bans, user.apiData.unownedChamps];
                         if (settings[SETTING_MIRROR].value && teams[1][userIndex]) {
                             blacklists.push(teams[1][userIndex].locks);
+                            blacklists.push(teams[1][userIndex].apiData.unownedChamps);
                         }
-                        user.champ = getRandomChamp(settings, Object.assign(...blacklists));
+                        user.champ = getRandomChamp(settings, Object.assign({}, ...blacklists));
                         if (!user.champ) {
                             user.champ = DEFAULT_CHAMP;
                         }
@@ -232,7 +240,7 @@ export function connectSocketio(io) {
         function scrambleOne(user) {
             const usersToReplace = [user];
             const takenChamps = {};
-            const blacklists = [takenChamps, user.locks, bans];
+            const blacklists = [takenChamps, user.locks, bans, user.apiData.unownedChamps];
             for (const [, currentUser] of users) {
                 takenChamps[currentUser.champ.name] = true;
                 // Find a mirrored user
@@ -244,6 +252,7 @@ export function connectSocketio(io) {
                 ) {
                     usersToReplace.push(currentUser);
                     blacklists.push(currentUser.locks);
+                    blacklists.push(currentUser.apiData.unownedChamps);
                 }
             }
             const champ = getRandomChamp(settings, Object.assign(...blacklists)) || DEFAULT_CHAMP;
@@ -252,6 +261,40 @@ export function connectSocketio(io) {
                 userToReplace.champ = champ;
                 userToReplace.talent = talent;
             }
+        }
+
+        async function loadPlayerData(user) {
+            user.apiData = {};
+            const name = user.name;
+            const promises = [fetchPlayerDetails(name), fetchPlayerChamps(name)];
+            const [detailsResponse, champsResponse] = await Promise.all(promises);
+            if (name !== user.name) {
+                // The name has changed, don't use this anymore.
+                return;
+            }
+            if (!detailsResponse || !detailsResponse.length || detailsResponse[0].ret_msg) {
+                user.apiData = {
+                    error: true,
+                };
+            } else {
+                const details = {
+                    level: detailsResponse[0].Level,
+                    wins: detailsResponse[0].Wins,
+                    losses: detailsResponse[0].Losses,
+                    irlName: detailsResponse[0].Name,
+                };
+                const unownedChamps = { ...lockableChamps };
+                for (const champ of champsResponse) {
+                    delete unownedChamps[champ.champion];
+                }
+
+                user.apiData = {
+                    ...details,
+                    unownedChamps,
+                };
+            }
+
+            notifyUsers();
         }
     });
 

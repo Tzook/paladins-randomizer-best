@@ -1,9 +1,10 @@
 import express from "express";
 import http from "http";
 import { resolve } from "path";
-import { crawlChamps } from "./champs-crawler.mjs";
 import { Server } from "socket.io";
 import { connectSocketio } from "./socket.mjs";
+import { test } from "./pala-api-service.mjs";
+import { loadAllChamps } from "./champs-service.mjs";
 
 const isDev = process.env.NODE_ENV !== "production";
 const PORT = process.env.PORT || 5000;
@@ -30,4 +31,5 @@ const io = new Server(server, {
 });
 connectSocketio(io);
 
-crawlChamps();
+setTimeout(() => loadAllChamps(), 100);
+test();

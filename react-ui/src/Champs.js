@@ -3,7 +3,22 @@ import { Close, Delete, Lock, Restore } from "@material-ui/icons";
 import Champ, { CHAMP_IMAGE_SIZE } from "./Champ";
 import { ICON_DROP_SHADOW } from "./constants";
 
-function Champs({ champs, lockedChamps = {}, toggleLock, bannedChamps = {}, toggleBan }) {
+function Champs({ champs, lockedChamps = {}, toggleLock, bannedChamps = {}, toggleBan, apiUnownedChamps = null }) {
+    function doesntOwnChamp(champ) {
+        return apiUnownedChamps && apiUnownedChamps[champ.name];
+    }
+    function isChampLocked(champ) {
+        return lockedChamps[champ.name] || bannedChamps[champ.name] || doesntOwnChamp(champ);
+    }
+    function getLockTitle(champ) {
+        if (doesntOwnChamp(champ)) {
+            return `'${champ.name}' isn't owned`;
+        } else if (bannedChamps[champ.name]) {
+            return `'${champ.name}' is banned in the room`;
+        } else {
+            return `'${champ.name}' is disabled`;
+        }
+    }
     return (
         <div
             style={{
@@ -23,7 +38,7 @@ function Champs({ champs, lockedChamps = {}, toggleLock, bannedChamps = {}, togg
                     }}>
                     <div
                         style={{
-                            opacity: lockedChamps[champ.name] || bannedChamps[champ.name] ? 0.4 : 1,
+                            opacity: isChampLocked(champ) ? 0.4 : 1,
                         }}>
                         <Champ champ={champ} />
                     </div>
@@ -83,7 +98,7 @@ function Champs({ champs, lockedChamps = {}, toggleLock, bannedChamps = {}, togg
                             )
                         ) : null}
                     </div>
-                    {lockedChamps[champ.name] || bannedChamps[champ.name] ? (
+                    {isChampLocked(champ) ? (
                         <div
                             style={{
                                 position: "absolute",
@@ -92,7 +107,7 @@ function Champs({ champs, lockedChamps = {}, toggleLock, bannedChamps = {}, togg
                                 left: "50%",
                                 textAlign: "center",
                             }}>
-                            <Tooltip title={`'${champ.name}' is banned`}>
+                            <Tooltip title={getLockTitle(champ)}>
                                 <IconButton style={ICON_DROP_SHADOW} color="secondary" size="small">
                                     <Lock />
                                 </IconButton>
