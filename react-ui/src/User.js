@@ -57,6 +57,14 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
         setShowInfoDialog(false);
     }, []);
 
+    function getWinRate() {
+        return Math.round((100 * user.apiData.wins) / (user.apiData.wins + user.apiData.losses));
+    }
+
+    function hasProfile() {
+        return user.apiData && user.apiData.wins > 10;
+    }
+
     return (
         <div
             style={{
@@ -157,20 +165,17 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                 <Tooltip title="Profile">
                     <IconButton style={ICON_DROP_SHADOW} color="secondary" size="small" onClick={showInfo}>
                         <Person />
-                        {(user.apiData || {}).level || null}
+                        {hasProfile() ? `${getWinRate()}%` : ""}
                     </IconButton>
                 </Tooltip>
 
                 <Dialog open={showInfoDialog} onClose={hideInfo}>
                     <DialogTitle>Profile of '{user.name}':</DialogTitle>
                     <DialogContent>
-                        {user.apiData.level ? (
+                        {hasProfile() ? (
                             <div>
                                 <DialogContentText>Level: {user.apiData.level}</DialogContentText>
-                                <DialogContentText>
-                                    Win rate:{" "}
-                                    {Math.round((100 * user.apiData.wins) / (user.apiData.wins + user.apiData.losses))}%
-                                </DialogContentText>
+                                <DialogContentText>Win rate: {getWinRate()}%</DialogContentText>
                                 <DialogContentText>Steam name: {user.apiData.irlName}</DialogContentText>
                             </div>
                         ) : (
