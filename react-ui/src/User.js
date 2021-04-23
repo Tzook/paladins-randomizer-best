@@ -6,7 +6,7 @@ import Champs from "./Champs";
 import { ICON_DROP_SHADOW } from "./constants";
 import Talent from "./Talent";
 
-export const USER_SIZE = 86;
+export const USER_SIZE = 160;
 
 function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
     const [showBanDialog, setShowBanDialog] = useState(false);

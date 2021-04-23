@@ -7,6 +7,15 @@ import { ICON_DROP_SHADOW } from "./constants";
 const TEAM_NAME_A = "a";
 const TEAM_NAME_B = "b";
 
+const usersStyle = {
+    display: "grid",
+    gridGap: "32px",
+    gridAutoFlow: "column",
+    gridTemplateRows: "1fr 1fr",
+    justifyContent: "flex-start",
+    width: "100%",
+};
+
 function Users({
     users,
     scramble,
@@ -68,13 +77,9 @@ function Users({
                 alignItems: "flex-start",
                 justifyContent: "center",
             }}>
-            <div style={{ width: USER_SIZE }}>
+            <div style={{ ...usersStyle, direction: "rtl" }}>
                 {teamA.map((user) => (
-                    <div
-                        key={user.id}
-                        style={{
-                            marginBottom: "16px",
-                        }}>
+                    <div key={user.id} style={{ direction: "ltr" }}>
                         <User
                             user={user}
                             yourId={yourId}
@@ -89,6 +94,8 @@ function Users({
             <div
                 style={{
                     margin: "0 80px",
+                    width: "180px",
+                    flexShrink: "0",
                 }}>
                 <h2>VS</h2>
 
@@ -147,13 +154,9 @@ function Users({
                     </Tooltip>
                 </div>
             </div>
-            <div style={{ width: USER_SIZE }}>
+            <div style={{ ...usersStyle }}>
                 {teamB.map((user) => (
-                    <div
-                        key={user.id}
-                        style={{
-                            marginBottom: "16px",
-                        }}>
+                    <div key={user.id}>
                         <User
                             user={user}
                             yourId={yourId}

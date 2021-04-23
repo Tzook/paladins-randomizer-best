@@ -49,7 +49,6 @@ async function createSession() {
     if (sessionResponse.session_id) {
         setTimeout(() => (sessionResponseDoNotUseThisOne = null), SESSION_DURATION);
     }
-    console.log("YAYA", sessionResponse);
     return sessionResponse.session_id;
 }
 

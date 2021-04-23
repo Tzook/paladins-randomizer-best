@@ -255,7 +255,7 @@ export function connectSocketio(io) {
                     blacklists.push(currentUser.apiData.unownedChamps);
                 }
             }
-            const champ = getRandomChamp(settings, Object.assign(...blacklists)) || DEFAULT_CHAMP;
+            const champ = getRandomChamp(settings, Object.assign({}, ...blacklists)) || DEFAULT_CHAMP;
             const talent = settings[SETTING_TALENT].value ? _.sample(champ.talents) : undefined;
             for (const userToReplace of usersToReplace) {
                 userToReplace.champ = champ;
