@@ -332,7 +332,7 @@ function chooseTeam() {
 
 function getValidName(name) {
     if (_.isString(name)) {
-        name = name.replace(/[^a-zA-Z0-9]/g, "").substring(0, 16);
+        name = name.replace(/[^a-zA-Z0-9 ]/g, "").substring(0, 16);
     }
     if (!name) {
         name = getRandomName();
