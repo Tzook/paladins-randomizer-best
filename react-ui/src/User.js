@@ -1,25 +1,26 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from "@material-ui/core";
-import { Close, InsertEmoticon, RemoveRedEye, Shuffle } from "@material-ui/icons";
-import { useCallback, useState } from "react";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    TextField,
+    Tooltip,
+} from "@material-ui/core";
+import { Close, Edit, RemoveRedEye, Shuffle } from "@material-ui/icons";
+import { useCallback, useRef, useState } from "react";
 import Champ from "./Champ";
 import Champs from "./Champs";
 import { ICON_DROP_SHADOW } from "./constants";
 import Talent from "./Talent";
 
-export const USER_SIZE = 160;
+const USER_SIZE = 160;
 
 function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
+    const userNameFieldRef = useRef(null);
     const [showBanDialog, setShowBanDialog] = useState(false);
-
-    const updateName = useCallback(
-        (event) => {
-            const text = event.target.innerText;
-            if (text !== user.name) {
-                sendNewName(text);
-            }
-        },
-        [user, sendNewName]
-    );
+    const [showEditDialog, setShowEditDialog] = useState(false);
 
     const kickUser = useCallback(() => {
         kick(user.id);
@@ -31,14 +32,22 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
     const hideBans = useCallback(() => {
         setShowBanDialog(false);
     }, []);
-
-    const updateNameIfDone = useCallback((event) => {
-        if (event.key === "Enter") {
-            event.stopPropagation();
-            event.preventDefault();
-            event.target.blur();
-        }
+    const showEdit = useCallback(() => {
+        setShowEditDialog(true);
     }, []);
+    const hideEdit = useCallback(() => {
+        setShowEditDialog(false);
+    }, []);
+    const saveEdit = useCallback(
+        (e) => {
+            e.preventDefault();
+            if (userNameFieldRef.current.value !== user.name) {
+                sendNewName(userNameFieldRef.current.value);
+            }
+            hideEdit();
+        },
+        [hideEdit, userNameFieldRef, user, sendNewName]
+    );
 
     return (
         <div
@@ -52,25 +61,16 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                 style={{
                     position: "absolute",
                     bottom: "6px",
-                    left: "0",
-                    right: "0",
-                }}>
-                <span
-                    contentEditable={user.id === yourId}
-                    spellCheck={false}
-                    suppressContentEditableWarning={true}
-                    onKeyDown={updateNameIfDone}
-                    onBlur={updateName}
-                    style={{
-                        padding: "0 4px",
-                        borderRadius: "4px",
-                        background: "rgba(0,0,0,0.6)",
-                        cursor: user.id === yourId ? "" : "default",
-                        margin: "0 -28px",
-                        whiteSpace: "nowrap",
-                    }}>
-                    {user.name}
-                </span>
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    padding: "0 4px",
+                    borderRadius: "4px",
+                    background: "rgba(0,0,0,0.6)",
+                    cursor: user.id === yourId ? "pointer" : "default",
+                    whiteSpace: "nowrap",
+                }}
+                onClick={user.id === yourId ? showEdit : null}>
+                {user.name}
             </div>
             <div
                 style={{
@@ -80,9 +80,9 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                 }}>
                 {user.id === yourId ? (
                     <div>
-                        <Tooltip title="This is you :)">
-                            <IconButton style={{ background: "white" }} color="primary" size="small">
-                                <InsertEmoticon />
+                        <Tooltip title="This is you! - Click to edit">
+                            <IconButton style={{ background: "white" }} color="primary" size="small" onClick={showEdit}>
+                                <Edit />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Scramble">
@@ -90,6 +90,27 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                                 <Shuffle />
                             </IconButton>
                         </Tooltip>
+
+                        <Dialog open={showEditDialog} onClose={hideEdit}>
+                            <DialogTitle>Edit your profile:</DialogTitle>
+                            <DialogContent>
+                                <form noValidate onSubmit={saveEdit} autoComplete="off">
+                                    <TextField
+                                        inputRef={userNameFieldRef}
+                                        label="Name"
+                                        inputProps={{ maxlength: 16 }}
+                                        defaultValue={user.name}
+                                        autoFocus
+                                        helperText="Write your Paladins name for better experience"
+                                    />
+                                </form>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={saveEdit} color="primary">
+                                    Save
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
                     </div>
                 ) : (
                     <div>
@@ -103,6 +124,22 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                                 <RemoveRedEye />
                             </IconButton>
                         </Tooltip>
+
+                        <Dialog open={showBanDialog} onClose={hideBans}>
+                            <DialogTitle>Champs of '{user.name}':</DialogTitle>
+                            <DialogContent>
+                                <Champs
+                                    champs={champs}
+                                    lockedChamps={user.locks}
+                                    apiUnownedChamps={(user.apiData || {}).unownedChamps}
+                                />
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={hideBans} color="primary" autoFocus>
+                                    Close
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
                     </div>
                 )}
             </div>
@@ -118,22 +155,6 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                     <Talent talent={user.talent} />
                 </div>
             ) : null}
-
-            <Dialog open={showBanDialog} onClose={hideBans}>
-                <DialogTitle>Champs of '{user.name}':</DialogTitle>
-                <DialogContent>
-                    <Champs
-                        champs={champs}
-                        lockedChamps={user.locks}
-                        apiUnownedChamps={(user.apiData || {}).unownedChamps}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={hideBans} color="primary" autoFocus>
-                        Close
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </div>
     );
 }

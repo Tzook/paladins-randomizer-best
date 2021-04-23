@@ -1,5 +1,5 @@
 import { Button, FormControlLabel, FormGroup, IconButton, Switch, Tooltip } from "@material-ui/core";
-import User, { USER_SIZE } from "./User";
+import User from "./User";
 import { Redo, Undo } from "@material-ui/icons";
 import { useCallback, useEffect, useState } from "react";
 import { ICON_DROP_SHADOW } from "./constants";
