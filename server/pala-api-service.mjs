@@ -5,6 +5,7 @@ import md5 from "md5";
 
 const PALADINS_API_BASE_URL = "http://api.paladins.com/paladinsapi.svc/";
 const SESSION_DURATION = 1000 * 60 * 14;
+export const NAME_TO_ID = new Map();
 
 let sessionResponseDoNotUseThisOne = null;
 let sessionIdDoNotUseThisOne = null;
@@ -19,11 +20,15 @@ async function getSessionId() {
 }
 
 export async function fetchPlayerDetails(playerName) {
-    return getDataApi("getplayer", playerName);
+    const playerDetails = await getDataApi("getplayer", playerName);
+    if (playerDetails && playerDetails.length && playerDetails[0].Id) {
+        NAME_TO_ID.set(playerName, playerDetails[0].Id);
+    }
+    return playerDetails;
 }
 
-export async function fetchPlayerChamps(playerName) {
-    return getDataApi("getchampionranks", playerName);
+export async function fetchPlayerChamps(playerId) {
+    return getDataApi("getplayerchampions", playerId);
 }
 
 export async function fetchAllChamps() {

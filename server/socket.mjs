@@ -9,6 +9,9 @@ import {
 } from "./champs-service.mjs";
 import { fetchPlayerDetails } from "./pala-api-service.mjs";
 import { getRandomName } from "mmo-name-generator";
+import { fetchPlayerChamps } from "./pala-api-service.mjs";
+import { lockableChamps } from "./champs-service.mjs";
+import { NAME_TO_ID } from "./pala-api-service.mjs";
 
 const users = new Map();
 let usersHistory = [];
@@ -265,10 +268,12 @@ export function connectSocketio(io) {
         async function loadPlayerData(user) {
             user.apiData = {};
             const name = user.name;
-            const [detailsResponse] = await Promise.all([
-                fetchPlayerDetails(name),
-                // fetchPlayerChamps(name),
-            ]);
+            const playerId = NAME_TO_ID.get(name);
+            const promises = [fetchPlayerDetails(name)];
+            if (playerId) {
+                promises.push(fetchPlayerChamps(playerId));
+            }
+            let [detailsResponse, champsResponse] = await Promise.all(promises);
             if (name !== user.name) {
                 // The name has changed, don't use this anymore.
                 return;
@@ -278,17 +283,26 @@ export function connectSocketio(io) {
                     error: true,
                 };
             } else {
+                if (!playerId) {
+                    champsResponse = await fetchPlayerChamps(detailsResponse[0].Id);
+                    if (name !== user.name) {
+                        // The name has changed, don't use this anymore.
+                        return;
+                    }
+                }
                 const details = {
                     level: detailsResponse[0].Level,
                     wins: detailsResponse[0].Wins,
                     losses: detailsResponse[0].Losses,
                     irlName: detailsResponse[0].Name,
                 };
-                // const unownedChamps = { ...lockableChamps };
-                // for (const champ of champsResponse) {
-                //     delete unownedChamps[champ.champion];
-                // }
-                const unownedChamps = {};
+                let unownedChamps = {};
+                if (champsResponse && champsResponse.length) {
+                    unownedChamps = { ...lockableChamps };
+                    for (const champ of champsResponse) {
+                        delete unownedChamps[champ.Champion];
+                    }
+                }
 
                 user.apiData = {
                     ...details,
