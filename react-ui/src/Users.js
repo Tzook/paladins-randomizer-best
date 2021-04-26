@@ -9,9 +9,9 @@ const TEAM_NAME_B = "b";
 
 const usersStyle = {
     display: "grid",
-    gridGap: "32px",
+    gridGap: "20px 32px",
     gridAutoFlow: "column",
-    gridTemplateRows: "1fr 1fr",
+    gridTemplateRows: "repeat(3, 1fr)",
     justifyContent: "flex-start",
     width: "100%",
 };

@@ -7,9 +7,8 @@ import {
     ROLE_DAMAGE,
     ROLE_FLANK,
 } from "./champs-service.mjs";
-import { fetchPlayerDetails, fetchPlayerChamps } from "./pala-api-service.mjs";
+import { fetchPlayerDetails } from "./pala-api-service.mjs";
 import { getRandomName } from "mmo-name-generator";
-import { lockableChamps } from "./champs-service.mjs";
 
 const users = new Map();
 let usersHistory = [];
@@ -266,21 +265,15 @@ export function connectSocketio(io) {
         async function loadPlayerData(user) {
             user.apiData = {};
             const name = user.name;
-            const [detailsResponse, champsResponse] = await Promise.all([
+            const [detailsResponse] = await Promise.all([
                 fetchPlayerDetails(name),
-                fetchPlayerChamps(name),
+                // fetchPlayerChamps(name),
             ]);
             if (name !== user.name) {
                 // The name has changed, don't use this anymore.
                 return;
             }
-            if (
-                !detailsResponse ||
-                !detailsResponse.length ||
-                detailsResponse[0].ret_msg ||
-                !champsResponse ||
-                !champsResponse.length
-            ) {
+            if (!detailsResponse || !detailsResponse.length || detailsResponse[0].ret_msg) {
                 user.apiData = {
                     error: true,
                 };
@@ -291,10 +284,11 @@ export function connectSocketio(io) {
                     losses: detailsResponse[0].Losses,
                     irlName: detailsResponse[0].Name,
                 };
-                const unownedChamps = { ...lockableChamps };
-                for (const champ of champsResponse) {
-                    delete unownedChamps[champ.champion];
-                }
+                // const unownedChamps = { ...lockableChamps };
+                // for (const champ of champsResponse) {
+                //     delete unownedChamps[champ.champion];
+                // }
+                const unownedChamps = {};
 
                 user.apiData = {
                     ...details,

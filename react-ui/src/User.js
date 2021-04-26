@@ -16,7 +16,7 @@ import Champs from "./Champs";
 import { ICON_DROP_SHADOW } from "./constants";
 import Talent from "./Talent";
 
-const USER_SIZE = 160;
+const USER_SIZE = 96;
 
 function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
     const userNameFieldRef = useRef(null);
@@ -93,6 +93,7 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                     position: "absolute",
                     top: -15,
                     left: -15,
+                    whiteSpace: "nowrap",
                 }}>
                 {user.id === yourId ? (
                     <span>
@@ -114,7 +115,7 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                                     <TextField
                                         inputRef={userNameFieldRef}
                                         label="Name"
-                                        inputProps={{ maxlength: 16 }}
+                                        inputProps={{ maxLength: 16 }}
                                         defaultValue={user.name}
                                         autoFocus
                                         helperText="Write your Paladins name for better experience"
