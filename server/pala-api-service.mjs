@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import dateformat from "dateformat";
 import md5 from "md5";
 
-const PALADINS_API_BASE_URL = "http://api.paladins.com/paladinsapi.svc/";
+const PALADINS_API_BASE_URL = "https://api.paladins.com/paladinsapi.svc/";
 const SESSION_DURATION = 1000 * 60 * 14;
 export const NAME_TO_ID = new Map();
 
