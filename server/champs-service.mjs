@@ -1,5 +1,6 @@
-import { fetchAllChamps, fetchAllChampsCards } from "./pala-api-service.mjs";
-import _ from "lodash";
+import _ from 'lodash';
+
+import { fetchAllChamps, fetchAllChampsCards } from './pala-api-service.mjs';
 
 export const ROLE_FRONTLINE = "Frontline";
 export const ROLE_SUPPORT = "Support";
@@ -42,10 +43,10 @@ export async function loadAllChamps() {
         return;
     }
     for (const card of allCards) {
-        if (card.item_type !== "Inventory Vendor - Talents") {
+        const champ = champsById[card.champion_id];
+        if (card.item_type !== "Inventory Vendor - Talents" || !champ) {
             continue;
         }
-        const champ = champsById[card.champion_id];
         champ.talents.push({
             name: card.DeviceName,
             description: card.Description,
