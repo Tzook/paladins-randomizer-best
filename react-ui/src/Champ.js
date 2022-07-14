@@ -1,5 +1,5 @@
-import { withStyles } from "@material-ui/core";
-import Tooltip from "@material-ui/core/Tooltip";
+import { withStyles } from '@material-ui/core';
+import Tooltip from '@material-ui/core/Tooltip';
 
 export const CHAMP_IMAGE_SIZE = 64;
 
@@ -28,7 +28,7 @@ function Champ({ champ, size = CHAMP_IMAGE_SIZE }) {
         <ChampTooltip title={champ.name} arrow>
             <img
                 style={{
-                    outline: `1px solid ${ROLE_DATA_TO_BORDER_COLOR[champ.role]}`,
+                    outline: `2px solid ${ROLE_DATA_TO_BORDER_COLOR[champ.role]}`,
                     display: "block",
                     boxShadow: "2px 2px 4px black",
                 }}
