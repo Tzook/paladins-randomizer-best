@@ -8,13 +8,14 @@ import {
     IconButton,
     TextField,
     Tooltip,
-} from "@material-ui/core";
-import { Close, Edit, Person, RemoveRedEye, Shuffle } from "@material-ui/icons";
-import { useCallback, useRef, useState } from "react";
-import Champ from "./Champ";
-import Champs from "./Champs";
-import { ICON_DROP_SHADOW } from "./constants";
-import Talent from "./Talent";
+} from '@material-ui/core';
+import { Close, Edit, Person, RemoveRedEye, Shuffle } from '@material-ui/icons';
+import { useCallback, useRef, useState } from 'react';
+
+import Champ from './Champ';
+import Champs from './Champs';
+import { ICON_DROP_SHADOW } from './constants';
+import Talent from './Talent';
 
 const USER_SIZE = 96;
 
@@ -176,7 +177,10 @@ function User({ user, yourId, sendNewName, kick, champs, scrambleSelf }) {
                         {hasProfile() ? (
                             <div>
                                 <DialogContentText>Level: {user.apiData.level}</DialogContentText>
-                                <DialogContentText>Win rate: {getWinRate()}%</DialogContentText>
+                                <DialogContentText>
+                                    Win rate: {getWinRate()}% ({user.apiData.wins} /{" "}
+                                    {user.apiData.wins + user.apiData.losses})
+                                </DialogContentText>
                                 <DialogContentText>Steam name: {user.apiData.irlName}</DialogContentText>
                             </div>
                         ) : (
